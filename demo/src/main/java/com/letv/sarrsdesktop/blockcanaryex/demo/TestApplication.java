@@ -26,7 +26,7 @@ public class TestApplication extends Application {
 
             @Override
             public boolean displayNotification() {
-                return false;
+                return true;
             }
         });
     }
