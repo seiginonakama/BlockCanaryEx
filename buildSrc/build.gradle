@@ -1,0 +1,13 @@
+apply plugin: 'groovy'
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    compile gradleApi()
+    compile 'com.android.tools.build:gradle:2.2.0'
+    compile "com.android.tools.build:gradle-api:2.2.0"
+    compile "org.aspectj:aspectjtools:1.8.6"
+    compile "org.javassist:javassist:3.20.0-GA"
+}
