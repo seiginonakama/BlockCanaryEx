@@ -91,7 +91,7 @@ public class LogWriter {
     /**
      * get log files
      *
-     * @param count if less than 0, return all log files, if > 0, return files orderBy modified time
+     * @param count if less than 0, return all log files, if larger than 0, return files orderBy modified time
      * @return File[] log files
      */
     public static File[] getLogFiles(int count) {

@@ -1,4 +1,7 @@
 apply plugin: 'groovy'
+apply plugin: "maven"
+apply plugin: 'maven-publish'
+apply plugin: 'com.jfrog.bintray'
 
 repositories {
     jcenter()
@@ -6,8 +9,66 @@ repositories {
 
 dependencies {
     compile gradleApi()
+    compile localGroovy()
     compile 'com.android.tools.build:gradle:2.2.0'
     compile "com.android.tools.build:gradle-api:2.2.0"
     compile "org.aspectj:aspectjtools:1.8.6"
     compile "org.javassist:javassist:3.20.0-GA"
+}
+
+version = "0.9.1"
+group = "com.letv.sarrsdesktop"
+
+def siteUrl = 'https://github.com/lqcandqq13/BlockCanaryEx'    // project homepage
+def gitUrl = 'https://github.com/lqcandqq13/BlockCanaryEx.git' // project git
+
+install {
+    repositories.mavenInstaller {
+        // This generates POM.xml with proper parameters
+        pom {
+            project {
+                name 'BlockCanaryExPlugin'
+                url siteUrl
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id 'lqcandqq13'
+                        name 'lqcandqq13'
+                        email 'lqcandqq13@gmail.com'
+                    }
+                }
+                scm {
+                    connection gitUrl
+                    developerConnection gitUrl
+                    url siteUrl
+                }
+            }
+        }
+    }
+}
+
+Properties properties = new Properties()
+boolean isHasFile = false
+if (project.rootProject.file('local.properties') != null){
+    isHasFile = true
+    properties.load(project.rootProject.file('local.properties').newDataInputStream())
+}
+
+bintray {
+    user = isHasFile ? properties.getProperty("bintray.user") : System.getenv("bintray.user")
+    key = isHasFile ? properties.getProperty("bintray.apikey") : System.getenv("bintray.apikey")
+    configurations = ['archives']
+    pkg {
+        repo = "maven"
+        name = "BlockCanaryExPlugin"
+        websiteUrl = siteUrl
+        vcsUrl = gitUrl
+        licenses = ["Apache-2.0"]
+        publish = true
+    }
 }

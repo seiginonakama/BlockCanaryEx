@@ -6,6 +6,7 @@ repositories {
 
 dependencies {
     compile gradleApi()
+    compile localGroovy()
     compile 'com.android.tools.build:gradle:2.2.0'
     compile "com.android.tools.build:gradle-api:2.2.0"
     compile "org.aspectj:aspectjtools:1.8.6"

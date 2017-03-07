@@ -25,6 +25,7 @@ public class MethodSampler {
 
     /**
      * this method called by injected code, so do't delete this
+     *
      */
     public static void onMethodExit(long startTimeNano, long startThreadTime, String cls, String method, String argTypes) {
         com.letv.sarrsdesktop.blockcanaryex.jrt.internal.BlockMonitor.ensureMonitorInstalled();

@@ -1,20 +1,28 @@
 package com.letv.sarrsdesktop.blockcanaryex.demo;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
+    private static final Handler sHandler = new Handler(Looper.getMainLooper());
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        doHeavyWork();
+        sHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                doHeavyWork();
 
-        int i = 100;
-        while (i-- > 0) {
-            doLightWork();
-        }
+                for (int i = 0; i < 100; i++) {
+                    doLightWork();
+                }
+            }
+        });
     }
 
     private void doHeavyWork() {

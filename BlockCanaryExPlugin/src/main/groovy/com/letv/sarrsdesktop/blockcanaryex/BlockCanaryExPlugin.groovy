@@ -105,6 +105,9 @@ public class BlockCanaryExPlugin implements Plugin<Project> {
                         if (mCareScopes.containsAll(directoryInput.getScopes())) {
                             processFileList.add(output);
                         }
+                        if(output.exists()) {
+                            FileUtils.cleanDirectory(output)
+                        }
                         FileUtils.copyDirectory(directoryInput.getFile(), output);
                     }
                 }
