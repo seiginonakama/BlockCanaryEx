@@ -19,6 +19,7 @@
 
 - apply BlockCanaryExPlugin
 
+root build.gradle
 ```
 buildscript {
     repositories {
@@ -29,7 +30,7 @@ buildscript {
     }
 }
 ```
-
+model build.gradle
 ```
 apply plugin: 'blockcanaryex'
 ```
