@@ -17,7 +17,7 @@
 
  watch your app with BlockCanaryEx when debug mode 
 
-- apply BlockCanaryExPlugin (TODO: upload to jcenter)
+- apply BlockCanaryExPlugin
 
 ```
 buildscript {
@@ -25,7 +25,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath xxxx
+        classpath 'com.letv.sarrsdesktop:BlockCanaryExPlugin:0.9.2'
     }
 }
 ```
@@ -33,10 +33,10 @@ buildscript {
 ```
 apply plugin: 'blockcanaryex'
 ```
-- add BlockCanaryExJRT dependencies (TODO: upload to jcenter)
+- add BlockCanaryExJRT dependencies
 
 ```
-compile project(':BlockCanaryExJRT')
+compile 'com.letv.sarrsdesktop:BlockCanaryExJRT:0.9.2'
 ```
 - init BlockCanaryEx when your application created
 
