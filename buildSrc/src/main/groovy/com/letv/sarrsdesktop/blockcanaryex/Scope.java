@@ -1,12 +1,11 @@
 package com.letv.sarrsdesktop.blockcanaryex;
-
 /**
  * author: zhoulei date: 2017/3/6.
  */
 public class Scope {
     boolean project = true;
-    boolean projectLocalDep = true;
-    boolean subProject = false;
+    boolean projectLocalDep = false;
+    boolean subProject = true;
     boolean subProjectLocalDep = false;
     boolean externalLibraries = false;
 
@@ -15,7 +14,7 @@ public class Scope {
     }
 
     void projectLocalDep(boolean enable) {
-        projectLocalDep = enable
+        projectLocalDep = enable;
     }
 
     void subProject(boolean enable) {

@@ -12,22 +12,6 @@ public class TestApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        BlockCanaryEx.install(new Config(this) {
-            @Override
-            public boolean isBlock(long startTime, long endTime, long startThreadTime, long endThreadTime) {
-                long costRealTime = endTime - startTime;
-                return costRealTime > 100L;
-            }
-
-            @Override
-            public boolean isHeavyMethod(com.letv.sarrsdesktop.blockcanaryex.jrt.MethodInfo methodInfo) {
-                return methodInfo.getCostRealTimeMs() > 2L || methodInfo.getCostThreadTime() > 1L;
-            }
-
-            @Override
-            public boolean displayNotification() {
-                return true;
-            }
-        });
+        BlockCanaryEx.install(new Config(this));
     }
 }

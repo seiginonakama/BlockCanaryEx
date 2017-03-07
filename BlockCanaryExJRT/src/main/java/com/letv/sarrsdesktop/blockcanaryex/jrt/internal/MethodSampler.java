@@ -28,8 +28,8 @@ public class MethodSampler {
      *
      */
     public static void onMethodExit(long startTimeNano, long startThreadTime, String cls, String method, String argTypes) {
-        com.letv.sarrsdesktop.blockcanaryex.jrt.internal.BlockMonitor.ensureMonitorInstalled();
+        BlockMonitor.ensureMonitorInstalled();
 
-        com.letv.sarrsdesktop.blockcanaryex.jrt.internal.BlockMonitor.reportMethodProfile(cls, method, argTypes, startTimeNano, startThreadTime, System.nanoTime(), SystemClock.currentThreadTimeMillis());
+        BlockMonitor.reportMethodProfile(cls, method, argTypes, startTimeNano, startThreadTime, System.nanoTime(), SystemClock.currentThreadTimeMillis());
     }
 }

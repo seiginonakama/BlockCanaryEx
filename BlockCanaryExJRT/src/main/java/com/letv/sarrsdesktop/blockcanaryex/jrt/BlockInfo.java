@@ -50,6 +50,8 @@ public class BlockInfo implements Serializable {
     public static final String KEY_UID = "uid";
     private static final String KEY_ENVIRONMENT_END = "---------------environment-end---------------";
 
+    public static final String KEY_TIMESTAMP = "time-stamp";
+
     private static final String KV = " = ";
     private static final String MS = "ms";
     private static final String KB = "KB";
@@ -71,6 +73,8 @@ public class BlockInfo implements Serializable {
         }
     };
 
+    private long timestamp;
+
     private String startTime;
     private String endTime;
     private String blockRealTime;
@@ -87,15 +91,20 @@ public class BlockInfo implements Serializable {
 
     public static BlockInfo newInstance(long startTime, long blockRealTime, long blockThreadTime, List<MethodInfo> methodInfoList, String cpuRateInfo, boolean isCpuBusy) {
         BlockInfo blockInfo = new BlockInfo();
+        blockInfo.timestamp = startTime + blockRealTime;
         blockInfo.startTime = TimeUtils.format(startTime);
         blockInfo.blockRealTime = blockRealTime + MS;
-        blockInfo.endTime = TimeUtils.format(startTime + blockRealTime);
+        blockInfo.endTime = TimeUtils.format(blockInfo.timestamp);
         blockInfo.blockThreadTime = blockThreadTime + MS;
         blockInfo.envInfo = generateEnvInfo(cpuRateInfo, isCpuBusy);
         blockInfo.topHeavyMethod = generateTopHeavyMethod(methodInfoList);
         blockInfo.heavyMethods = generateHeavyMethod(methodInfoList);
         blockInfo.calculateFrequentMethods(methodInfoList);
         return blockInfo;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
     }
 
     public String getStartTime() {
@@ -245,6 +254,7 @@ public class BlockInfo implements Serializable {
         sb.append(KEY_BLOCK_THREAD_TIME).append(KV).append(blockThreadTime).append(SEPARATOR);
         sb.append(KEY_TOP_HEAVY_METHOD).append(KV).append(topHeavyMethod).append(SEPARATOR);
         sb.append(KEY_TOP_FREQUENT_METHOD).append(KV).append(topFrequentMethod).append(SEPARATOR);
+        sb.append(KEY_TIMESTAMP).append(KV).append(timestamp).append(SEPARATOR);
 
         sb.append(KEY_ENVIRONMENT).append(SEPARATOR);
         sb.append(envInfo);
@@ -322,6 +332,11 @@ public class BlockInfo implements Serializable {
             prefix = KEY_TOP_FREQUENT_METHOD + KV;
             if (line.startsWith(prefix)) {
                 topFrequentMethod = line.substring(prefix.length());
+                continue;
+            }
+            prefix = KEY_TIMESTAMP + KV;
+            if(line.startsWith(prefix)) {
+                timestamp = Long.valueOf(line.substring(prefix.length()));
                 continue;
             }
             prefix = KEY_HEAVY_METHOD;

@@ -400,8 +400,9 @@ public class DisplayActivity extends Activity implements LogWriter.LogListener {
                 Collections.sort(blockInfoList, new Comparator<BlockInfoEx>() {
                     @Override
                     public int compare(BlockInfoEx lhs, BlockInfoEx rhs) {
-                        return Long.valueOf(rhs.logFile.lastModified())
-                                .compareTo(lhs.logFile.lastModified());
+                        long l = lhs.getTimestamp();
+                        long r = rhs.getTimestamp();
+                        return l > r ? -1 : l == r ? 0 : 1;
                     }
                 });
             }

@@ -8,6 +8,7 @@ import org.apache.commons.io.FileUtils
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.invocation.Gradle
+import org.gradle.internal.hash.HashUtil
 
 import java.util.regex.Matcher
 import java.util.regex.Pattern
@@ -16,6 +17,10 @@ import java.util.regex.Pattern
  * author: zhoulei date: 2017/2/28.
  */
 public class BlockCanaryExPlugin implements Plugin<Project> {
+    private static final String TRANSFORM_NAME = "blockCanaryEx";
+
+    private static final String I = File.separator;
+
     private static final Set<QualifiedContent.ContentType> TYPES = new HashSet<>();
     private static final Set<QualifiedContent.Scope> SCOPES = new HashSet<>();
     private final Set<QualifiedContent.Scope> mCareScopes = new HashSet<>();
@@ -50,7 +55,7 @@ public class BlockCanaryExPlugin implements Plugin<Project> {
         project.android.registerTransform(new Transform() {
             @Override
             String getName() {
-                return "blockCanaryEx";
+                return TRANSFORM_NAME;
             }
 
             @Override
@@ -65,7 +70,7 @@ public class BlockCanaryExPlugin implements Plugin<Project> {
 
             @Override
             boolean isIncremental() {
-                return true;
+                return false;
             }
 
             @Override
@@ -80,6 +85,8 @@ public class BlockCanaryExPlugin implements Plugin<Project> {
                     setCareScope(block.getScope())
                 }
 
+                cleanTransformsDir(project)
+
                 Collection<TransformInput> transformInputs = transformInvocation.getInputs();
                 List<File> processFileList = new ArrayList<>();
                 Set<File> classPath = new HashSet<>()
@@ -88,14 +95,16 @@ public class BlockCanaryExPlugin implements Plugin<Project> {
                     Collection<JarInput> jarInputs = transformInput.getJarInputs();
                     for (JarInput jarInput : jarInputs) {
                         classPath.add(jarInput.getFile())
+                        String name = HashUtil.createHash(jarInput.getFile(), "MD5")
                         File output = transformInvocation.outputProvider.getContentLocation(
-                                jarInput.getName(), jarInput.getContentTypes(),
+                                name, jarInput.getContentTypes(),
                                 jarInput.getScopes(), Format.JAR);
                         if (mCareScopes.containsAll(jarInput.getScopes())) {
                             processFileList.add(output);
                         }
                         FileUtils.copyFile(jarInput.getFile(), output);
                     }
+
                     Collection<DirectoryInput> directoryInputs = transformInput.getDirectoryInputs();
                     for (DirectoryInput directoryInput : directoryInputs) {
                         classPath.add(directoryInput.getFile())
@@ -104,9 +113,6 @@ public class BlockCanaryExPlugin implements Plugin<Project> {
                                 directoryInput.getScopes(), Format.DIRECTORY);
                         if (mCareScopes.containsAll(directoryInput.getScopes())) {
                             processFileList.add(output);
-                        }
-                        if(output.exists()) {
-                            FileUtils.cleanDirectory(output)
                         }
                         FileUtils.copyDirectory(directoryInput.getFile(), output);
                     }
@@ -121,6 +127,10 @@ public class BlockCanaryExPlugin implements Plugin<Project> {
                 }
             }
         });
+
+        project.afterEvaluate({
+            handleConfigChanged(project, block)
+        })
     }
 
     static boolean isDebug(Project project) {
@@ -167,5 +177,29 @@ public class BlockCanaryExPlugin implements Plugin<Project> {
         mExcludePackages.addAll(block.excludePackages)
         mIncludePackages.addAll(block.includePackages)
         mExcludeClasses.addAll(block.excludePackages)
+    }
+
+    static void handleConfigChanged(Project project, BlockCanaryExExtension block) {
+        File preConfigFile = new File(project.getBuildDir().absolutePath + "${I}BlockCanaryEx${I}config.properties");
+        String nowHash = block.generateHash()
+        Properties properties = new Properties()
+        if(!preConfigFile.exists()) {
+            cleanTransformsDir(project)
+        } else {
+            properties.load(preConfigFile.newDataInputStream())
+            String preHash = properties.getProperty("hash")
+            if(!nowHash.equals(preHash)) {
+                cleanTransformsDir(project)
+            }
+        }
+        preConfigFile.delete()
+        FileUtils.touch(preConfigFile)
+        properties.put("hash", nowHash)
+        properties.store(preConfigFile.newDataOutputStream(), "")
+    }
+
+    static void cleanTransformsDir(Project project) {
+        File transformsDir = new File(project.getBuildDir().absolutePath + "${I}intermediates${I}transforms${I}${TRANSFORM_NAME}")
+        FileUtils.deleteDirectory(transformsDir)
     }
 }

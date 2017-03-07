@@ -63,8 +63,7 @@ public class Config implements BlockMonitor.BlockObserver {
      * @return true if blocked, else false
      */
     public boolean isBlock(long startTime, long endTime, long startThreadTime, long endThreadTime) {
-        long costRealTime = endTime - startTime;
-        return costRealTime > 100L && costRealTime < 2 * (endThreadTime - startThreadTime);
+        return (endTime - startTime) > 100L && (endThreadTime - startThreadTime) > 0L;
     }
 
     /**
@@ -72,11 +71,11 @@ public class Config implements BlockMonitor.BlockObserver {
      *
      * Note: running in none ui thread
      *
-     * @param methodInfo {@link com.letv.sarrsdesktop.blockcanaryex.jrt.MethodInfo}
+     * @param methodInfo {@link MethodInfo}
      * @return true if it is heavy method, else false
      */
-    public boolean isHeavyMethod(com.letv.sarrsdesktop.blockcanaryex.jrt.MethodInfo methodInfo) {
-        return methodInfo.getCostThreadTime() >= 1L;
+    public boolean isHeavyMethod(MethodInfo methodInfo) {
+        return methodInfo.getCostThreadTime() > 0L;
     }
 
     /**
@@ -92,18 +91,19 @@ public class Config implements BlockMonitor.BlockObserver {
     }
 
     /**
-     * Path to save log, like "/blockcanary/", will save to sdcard if can.
+     * Path to save log, like "/blockcanary/", will save to sdcard if can, else we will save to
+     * "${context.getFilesDir()/${provideLogPath()}"}"
      *
      * Note: running in none ui thread
      *
      * @return path of log files
      */
     public String provideLogPath() {
-        return "/blockcanaryex/" + mContext.getPackageName() + "/";
+        return "/blockcanaryex/" + getContext().getPackageName() + "/";
     }
 
     /**
-     * Network type to record in log
+     * Network type to record in log, you should impl this if you want to record this
      *
      * @return {@link String} like 2G, 3G, 4G, wifi, etc.
      */
@@ -112,7 +112,7 @@ public class Config implements BlockMonitor.BlockObserver {
     }
 
     /**
-     * unique id to record in log
+     * unique id to record in log, you should impl this if you want to record this
      *
      * @return {@link String} like imei, account id...
      */

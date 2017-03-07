@@ -1,5 +1,7 @@
 package com.letv.sarrsdesktop.blockcanaryex
 
+import com.letv.sarrsdesktop.blockcanaryex.DirClassPath
+import com.letv.sarrsdesktop.blockcanaryex.JarClassPath
 import javassist.*
 
 import java.util.jar.JarEntry
@@ -96,23 +98,23 @@ class SamplerInjecter {
     }
 
     static void insertSamplerCode(CtClass clazz, CtBehavior ctBehavior) {
-        ctBehavior.addLocalVariable("startTimeNano", CtClass.longType);
-        ctBehavior.addLocalVariable("startThreadTime", CtClass.longType);
-        ctBehavior.addLocalVariable("isConcernLooper", CtClass.booleanType);
+        ctBehavior.addLocalVariable("___bl_startTimeNano", CtClass.longType);
+        ctBehavior.addLocalVariable("___bl_startThreadTime", CtClass.longType);
+        ctBehavior.addLocalVariable("___bl_isConcernLooper", CtClass.booleanType);
         ctBehavior.insertBefore(
                 """
-                  startTimeNano = 0L;
-                  startThreadTime = 0L;
-                  isConcernLooper = com.letv.sarrsdesktop.blockcanaryex.jrt.internal.MethodSampler.isConcernLooper();
-                  if(isConcernLooper) {
-                      startTimeNano = java.lang.System.nanoTime();
-                      startThreadTime = android.os.SystemClock.currentThreadTimeMillis();
+                  ___bl_startTimeNano = 0L;
+                  ___bl_startThreadTime = 0L;
+                  ___bl_isConcernLooper = com.letv.sarrsdesktop.blockcanaryex.jrt.internal.MethodSampler.isConcernLooper();
+                  if(___bl_isConcernLooper) {
+                      ___bl_startTimeNano = java.lang.System.nanoTime();
+                      ___bl_startThreadTime = android.os.SystemClock.currentThreadTimeMillis();
                   }
                 """)
         ctBehavior.insertAfter(
                 """
-                   if(isConcernLooper) {
-                       com.letv.sarrsdesktop.blockcanaryex.jrt.internal.MethodSampler.onMethodExit(startTimeNano, startThreadTime, "${clazz.name}", "${ctBehavior.name}", "${generateParamTypes(ctBehavior.parameterTypes)}");
+                   if(___bl_isConcernLooper) {
+                       com.letv.sarrsdesktop.blockcanaryex.jrt.internal.MethodSampler.onMethodExit(___bl_startTimeNano, ___bl_startThreadTime, "${clazz.name}", "${ctBehavior.name}", "${generateParamTypes(ctBehavior.parameterTypes)}");
                    }
                 """)
     }

@@ -1,6 +1,7 @@
 package com.letv.sarrsdesktop.blockcanaryex
 
 import org.gradle.api.Action
+import org.gradle.internal.hash.HashUtil
 
 /**
  * author: zhoulei date: 2017/3/6.
@@ -40,5 +41,11 @@ class BlockCanaryExExtension {
 
     Scope getScope() {
         return scope;
+    }
+
+    String generateHash() {
+        String content = "releaseEnabled:{$releaseEnabled} debugEnabled:{$debugEnabled} includePackages:{$includePackages} excludePackages:{$excludePackages}" +
+                " excludeClasses:{$excludeClasses} scope:" + ReflectUtils.printObject(scope);
+        return HashUtil.createCompactMD5(content)
     }
 }

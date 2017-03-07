@@ -1,8 +1,8 @@
 package com.letv.sarrsdesktop.blockcanaryex.jrt.internal;
 
 import com.letv.sarrsdesktop.blockcanaryex.jrt.BlockCanaryEx;
-import com.letv.sarrsdesktop.blockcanaryex.jrt.Config;
 import com.letv.sarrsdesktop.blockcanaryex.jrt.BlockInfo;
+import com.letv.sarrsdesktop.blockcanaryex.jrt.Config;
 
 import android.content.Context;
 import android.os.Environment;

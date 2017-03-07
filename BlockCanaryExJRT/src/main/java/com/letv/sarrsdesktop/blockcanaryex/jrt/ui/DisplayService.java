@@ -18,8 +18,8 @@ package com.letv.sarrsdesktop.blockcanaryex.jrt.ui;
 import com.letv.sarrsdesktop.blockcanaryex.jrt.BlockCanaryEx;
 import com.letv.sarrsdesktop.blockcanaryex.jrt.BlockInfo;
 import com.letv.sarrsdesktop.blockcanaryex.jrt.Config;
-import com.letv.sarrsdesktop.blockcanaryex.jrt.internal.BlockMonitor;
 import com.letv.sarrsdesktop.blockcanaryex.jrt.R;
+import com.letv.sarrsdesktop.blockcanaryex.jrt.internal.BlockMonitor;
 
 import android.annotation.TargetApi;
 import android.app.Notification;
