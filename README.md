@@ -29,7 +29,7 @@ apply plugin: 'blockcanaryex'
 ```
 
 ```groovy
-compile 'com.letv.sarrsdesktop:BlockCanaryExJRT:0.9.2'
+compile 'com.letv.sarrsdesktop:BlockCanaryExJRT:0.9.2.2'
 ```
 
 Basic Usage
