@@ -63,7 +63,7 @@ public class Config implements BlockMonitor.BlockObserver {
      * @return true if blocked, else false
      */
     public boolean isBlock(long startTime, long endTime, long startThreadTime, long endThreadTime) {
-        return (endTime - startTime) > 100L && (endThreadTime - startThreadTime) > 0L;
+        return (endTime - startTime) > 100L && (endThreadTime - startThreadTime) > 8L;
     }
 
     /**

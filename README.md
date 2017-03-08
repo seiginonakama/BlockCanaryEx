@@ -1,26 +1,17 @@
+BlockCanaryEx
+=============
+a library for android which can help you to find the most heavy method in your code when your app blocked,
+base on BlockCanary.
 
-
-# BlockCanaryEx
-
-**detect the method which cost time in main thread and leading you app blocked, base on BlockCanary(now called AndroidPerformanceMonitor)**
-
-<img src="https://raw.githubusercontent.com/lqcandqq13/BlockCanaryEx/master/sample.jpeg" width = "480" alt="sample" align=center />
-
-
-#### what's the difference between BlockCanaryEx and BlockCanary?
-
+What's the difference between BlockCanaryEx and BlockCanary
+-------------
 - BlockCanaryEx base on BlockCanary, inherit it's ui and most of features;
-- BlockCanaryEx add MethodSampler, knows every method's execute-info (like cost-time, called-times...) when blocked;
-- BlockCanaryEx focus on the method which cost most of time when our app blocked, and display it directly to developer.
+- BlockCanaryEx add MethodSampler, knows every method's execute info (like cost-time, called-times...) when blocked;
+- BlockCanaryEx focus on the method which cost most of time when your app blocked, and display it directly to developer.
 
-#### Basic Usage
-
- watch your app with BlockCanaryEx when debug mode 
-
-- apply BlockCanaryExPlugin
-
-root build.gradle
-```
+Download
+-------------
+```groovy
 buildscript {
     repositories {
         jcenter()
@@ -30,16 +21,19 @@ buildscript {
     }
 }
 ```
-model build.gradle
-```
+
+```groovy
 apply plugin: 'blockcanaryex'
 ```
-- add BlockCanaryExJRT dependencies
 
 ```
 compile 'com.letv.sarrsdesktop:BlockCanaryExJRT:0.9.2'
 ```
-- init BlockCanaryEx when your application created
+
+Basic Usage
+-------------
+
+init BlockCanaryEx when your application created
 
 ```
 public class TestApplication extends Application {
@@ -50,15 +44,18 @@ public class TestApplication extends Application {
     }
 }
 ```
+
 done, now BlockCanaryEx be enabled when you app in debug mode.
 
-#### Advance Usage
+Advance Usage
+-------------
 
-customize BlockCanaryEx
+BlockCanaryEx do method sample by inject MethodSampler into your code when compile time,
+the scope to inject MethodSampler is the src of your project and subProject by default.
+projectLocalDep, subProjectLocalDep, externalLibraries is ignored. If you want to change
+the scope to watch more method performance, you can do the config in gradle.
 
-* customize MethodSampler scope in model build.gradle
-
-  ```
+ ```groovy
   apply plugin: 'blockcanaryex'
 
   block {
@@ -76,11 +73,11 @@ customize BlockCanaryEx
           externalLibraries false //inject MethodSampler external libs, default false
       }
   }
-  ```
+ ```
 
-* override more Config method to customize BlockCanaryEx runtime
+you also can override more Config method to customize BlockCanaryEx runtime
 
-  ```
+ ```java
   public class TestApplication extends Application {
       @Override
       public void onCreate() {
@@ -201,4 +198,19 @@ customize BlockCanaryEx
           });
       }
   }
-  ```
+ ```
+
+ License
+ -------
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
