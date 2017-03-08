@@ -13,6 +13,7 @@ What's the difference between BlockCanaryEx and BlockCanary
 
 Download
 -------------
+root build.gradle
 ```groovy
 buildscript {
     repositories {
@@ -23,7 +24,7 @@ buildscript {
     }
 }
 ```
-
+model build.gradle
 ```groovy
 apply plugin: 'blockcanaryex'
 ```
