@@ -1,7 +1,9 @@
 BlockCanaryEx
 =============
 a library for android which can help you to find the most heavy method in your code when your app blocked,
-base on BlockCanary.
+base on [BlockCanary](https://github.com/markzhai/AndroidPerformanceMonitor).
+
+![TextLayoutBuilder logo](./sample.png)
 
 What's the difference between BlockCanaryEx and BlockCanary
 -------------
@@ -26,7 +28,7 @@ buildscript {
 apply plugin: 'blockcanaryex'
 ```
 
-```
+```groovy
 compile 'com.letv.sarrsdesktop:BlockCanaryExJRT:0.9.2'
 ```
 
@@ -35,7 +37,7 @@ Basic Usage
 
 init BlockCanaryEx when your application created
 
-```
+```java
 public class TestApplication extends Application {
     @Override
     public void onCreate() {
@@ -55,7 +57,7 @@ the scope to inject MethodSampler is the src of your project and subProject by d
 projectLocalDep, subProjectLocalDep, externalLibraries is ignored. If you want to change
 the scope to watch more method performance, you can do the config in gradle.
 
- ```groovy
+```groovy
   apply plugin: 'blockcanaryex'
 
   block {
@@ -77,7 +79,7 @@ the scope to watch more method performance, you can do the config in gradle.
 
 you also can override more Config method to customize BlockCanaryEx runtime
 
- ```java
+```java
   public class TestApplication extends Application {
       @Override
       public void onCreate() {
@@ -200,8 +202,8 @@ you also can override more Config method to customize BlockCanaryEx runtime
   }
  ```
 
- License
- -------
+License
+-------
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
