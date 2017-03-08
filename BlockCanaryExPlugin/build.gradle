@@ -27,7 +27,7 @@ install {
         // This generates POM.xml with proper parameters
         pom {
             project {
-                name 'BlockCanaryExPlugin'
+                name 'blockcanaryex-plugin'
                 url siteUrl
                 licenses {
                     license {
@@ -82,7 +82,7 @@ bintray {
     configurations = ['archives']
     pkg {
         repo = "maven"
-        name = "BlockCanaryExPlugin"
+        name = "blockcanaryex-plugin"
         websiteUrl = siteUrl
         vcsUrl = gitUrl
         licenses = ["Apache-2.0"]

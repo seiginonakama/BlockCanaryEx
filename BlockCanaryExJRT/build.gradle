@@ -42,7 +42,7 @@ install {
         pom {
             project {
                 packaging 'aar'
-                name 'BlockCanaryExJRT'
+                name 'blockcanaryex-jrt'
                 url siteUrl
                 licenses {
                     license {
@@ -100,7 +100,7 @@ bintray {
     configurations = ['archives']
     pkg {
         repo = "maven"
-        name = "BlockCanaryExJRT"
+        name = "blockcanaryex-jrt"
         websiteUrl = siteUrl
         vcsUrl = gitUrl
         licenses = ["Apache-2.0"]
