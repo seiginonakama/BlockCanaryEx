@@ -26,7 +26,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.letv.sarrsdesktop:BlockCanaryExPlugin:0.9.2'
+        classpath 'com.letv.sarrsdesktop:BlockCanaryExPlugin:0.9.2.2'
     }
 }
 ```

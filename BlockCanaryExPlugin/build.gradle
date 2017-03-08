@@ -16,7 +16,7 @@ dependencies {
     compile "org.javassist:javassist:3.20.0-GA"
 }
 
-version = "0.9.2"
+version = "0.9.2.2"
 group = "com.letv.sarrsdesktop"
 
 def siteUrl = 'https://github.com/lqcandqq13/BlockCanaryEx'    // project homepage
@@ -52,11 +52,28 @@ install {
     }
 }
 
+def I = File.separator
+
+task sourcesJar(type: Jar) {
+    from new File(project.getProjectDir(), "src${I}main${I}groovy")
+    classifier = 'sources'
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
 Properties properties = new Properties()
 boolean isHasFile = false
 if (project.rootProject.file('local.properties') != null){
     isHasFile = true
     properties.load(project.rootProject.file('local.properties').newDataInputStream())
+}
+
+artifacts {
+    archives javadocJar
+    archives sourcesJar
 }
 
 bintray {
