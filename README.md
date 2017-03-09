@@ -20,7 +20,8 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.letv.sarrsdesktop:BlockCanaryExPlugin:0.9.2.2'
+        classpath 'com.android.tools.build:gradle:1.5.0' //version must >= 1.5.0
+        classpath 'com.letv.sarrsdesktop:BlockCanaryExPlugin:0.9.2.3'
     }
 }
 ```
@@ -30,7 +31,7 @@ apply plugin: 'blockcanaryex'
 ```
 
 ```groovy
-compile 'com.letv.sarrsdesktop:BlockCanaryExJRT:0.9.2.2'
+compile 'com.letv.sarrsdesktop:BlockCanaryExJRT:0.9.2.3'
 ```
 
 Basic Usage

@@ -98,23 +98,23 @@ class SamplerInjecter {
     }
 
     static void insertSamplerCode(CtClass clazz, CtBehavior ctBehavior) {
-        ctBehavior.addLocalVariable("___bl_startTimeNano", CtClass.longType);
-        ctBehavior.addLocalVariable("___bl_startThreadTime", CtClass.longType);
-        ctBehavior.addLocalVariable("___bl_isConcernLooper", CtClass.booleanType);
+        ctBehavior.addLocalVariable("__bl_stn", CtClass.longType);
+        ctBehavior.addLocalVariable("__bl_stt", CtClass.longType);
+        ctBehavior.addLocalVariable("__bl_icl", CtClass.booleanType);
         ctBehavior.insertBefore(
                 """
-                  ___bl_startTimeNano = 0L;
-                  ___bl_startThreadTime = 0L;
-                  ___bl_isConcernLooper = com.letv.sarrsdesktop.blockcanaryex.jrt.internal.MethodSampler.isConcernLooper();
-                  if(___bl_isConcernLooper) {
-                      ___bl_startTimeNano = java.lang.System.nanoTime();
-                      ___bl_startThreadTime = android.os.SystemClock.currentThreadTimeMillis();
+                  __bl_stn = 0L;
+                  __bl_stt = 0L;
+                  __bl_icl = com.letv.sarrsdesktop.blockcanaryex.jrt.internal.MethodSampler.isConcernLooper();
+                  if(__bl_icl) {
+                      __bl_stn = java.lang.System.nanoTime();
+                      __bl_stt = android.os.SystemClock.currentThreadTimeMillis();
                   }
                 """)
         ctBehavior.insertAfter(
                 """
-                   if(___bl_isConcernLooper) {
-                       com.letv.sarrsdesktop.blockcanaryex.jrt.internal.MethodSampler.onMethodExit(___bl_startTimeNano, ___bl_startThreadTime, "${clazz.name}", "${ctBehavior.name}", "${generateParamTypes(ctBehavior.parameterTypes)}");
+                   if(__bl_icl) {
+                       com.letv.sarrsdesktop.blockcanaryex.jrt.internal.MethodSampler.onMethodExit(__bl_stn, __bl_stt, "${clazz.name}", "${ctBehavior.name}", "${generateParamTypes(ctBehavior.parameterTypes)}");
                    }
                 """)
     }

@@ -9,6 +9,7 @@ import com.letv.sarrsdesktop.blockcanaryex.jrt.ui.DisplayService;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.util.Log;
 
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
@@ -20,7 +21,7 @@ import static android.content.pm.PackageManager.DONT_KILL_APP;
  * author: zhoulei date: 2017/2/28.
  */
 public class BlockCanaryEx {
-
+    private static final String TAG = "BlockCanaryEx";
     private static Config sConfig;
     private static final DisplayService DISPLAY_SERVICE = new DisplayService();
 
@@ -79,6 +80,11 @@ public class BlockCanaryEx {
         PackageManager packageManager = appContext.getPackageManager();
         int newState = enabled ? COMPONENT_ENABLED_STATE_ENABLED : COMPONENT_ENABLED_STATE_DISABLED;
         // Blocks on IPC.
-        packageManager.setComponentEnabledSetting(component, newState, DONT_KILL_APP);
+        try {
+            //may throw exception if component don't exist
+            packageManager.setComponentEnabledSetting(component, newState, DONT_KILL_APP);
+        } catch (Throwable t) {
+            Log.e(TAG, "setEnabledBlocking failed:" + t.toString());
+        }
     }
 }
