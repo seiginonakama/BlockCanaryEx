@@ -7,12 +7,7 @@ import com.android.build.gradle.internal.api.ApplicationVariantImpl
 import org.apache.commons.io.FileUtils
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.invocation.Gradle
 import org.gradle.internal.hash.HashUtil
-
-import java.util.regex.Matcher
-import java.util.regex.Pattern
-
 /**
  * author: zhoulei date: 2017/2/28.
  */
@@ -75,7 +70,7 @@ public class BlockCanaryExPlugin implements Plugin<Project> {
 
             @Override
             public void transform(TransformInvocation transformInvocation) throws TransformException, InterruptedException, IOException {
-                boolean isDebug = isDebug(project)
+                boolean isDebug = isDebug(transformInvocation)
                 if ((isDebug && !block.debugEnabled)
                         || (!isDebug && !block.releaseEnabled)) {
                     mCareScopes.clear();
@@ -133,25 +128,10 @@ public class BlockCanaryExPlugin implements Plugin<Project> {
         })
     }
 
-    static boolean isDebug(Project project) {
-        Gradle gradle = project.getGradle()
-        String tskReqStr = gradle.getStartParameter().getTaskRequests().toString()
-
-        Pattern pattern;
-
-        if (tskReqStr.contains("assemble"))
-            pattern = Pattern.compile("assemble.*(Release|Debug)")
-        else
-            pattern = Pattern.compile("generate.*(Release|Debug)")
-
-        Matcher matcher = pattern.matcher(tskReqStr)
-
-        if (matcher.find()) {
-            return matcher.group(1).equals("Debug")
-        } else {
-            println "NO MATCH FOUND"
-            return false;
-        }
+    static boolean isDebug(TransformInvocation transformInvocation) {
+        String path = transformInvocation.getContext().getPath()
+        String debug = "Debug"
+        return path != null && debug.equalsIgnoreCase(path.substring(path.length() - debug.length(), path.length()))
     }
 
     void setCareScope(Scope scope) {
