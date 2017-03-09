@@ -25,7 +25,7 @@ public class BlockMonitor {
     private static final LooperMonitor.BlockListener BLOCK_LISTENER = new LooperMonitor.BlockListener() {
         @Override
         public void onStart() {
-            CpuSampler.getInstance().beginSample();
+            CpuSampler.getInstance().resetSampleIfNoFresh();
         }
 
         @Override
@@ -42,7 +42,7 @@ public class BlockMonitor {
             resetMethodInfoPool();
 
             CpuSampler cpuSampler = CpuSampler.getInstance();
-            cpuSampler.endSample();
+            cpuSampler.recordSample();
             final BlockInfo blockInfo = BlockInfo.newInstance(realStartTime, realTimeEnd - realStartTime, threadTimeEnd - threadTimeStart,
                     methodInfoList, cpuSampler.getCpuRateInfo(), cpuSampler.isCpuBusy(realStartTime, realTimeEnd));
             notifyBlocked(blockInfo);

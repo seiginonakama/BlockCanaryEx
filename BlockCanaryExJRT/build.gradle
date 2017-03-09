@@ -30,7 +30,7 @@ android {
     }
 }
 
-version = "0.9.2.3"
+version = "0.9.2.4"
 group = "com.letv.sarrsdesktop"
 
 def siteUrl = 'https://github.com/lqcandqq13/BlockCanaryEx'    // project homepage

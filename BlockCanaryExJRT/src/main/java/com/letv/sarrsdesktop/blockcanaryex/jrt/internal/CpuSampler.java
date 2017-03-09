@@ -33,7 +33,9 @@ import java.util.Map;
 class CpuSampler {
 
     private static final String TAG = "CpuSampler";
+    private static final int SAMPLE_INTERVAL = 1000;
     private static final int BUFFER_SIZE = 1000;
+    private static final int BUST_TIME = (int) (SAMPLE_INTERVAL * 1.2);
 
     /**
      * TODO: Explain how we define cpu busy in README
@@ -50,24 +52,23 @@ class CpuSampler {
     private long mAppCpuTimeLast = 0;
 
     private long mSampleStart = 0;
-    private long mSampleInterval = 0;
-    private long mBusyTime = 0;
 
     private static final CpuSampler sInstance = new CpuSampler();
 
-    public static CpuSampler getInstance() {
+    static CpuSampler getInstance() {
         return sInstance;
     }
 
-    void beginSample() {
-        reset();
-        mSampleStart = SystemClock.uptimeMillis();
-        doSample();
+    void resetSampleIfNoFresh() {
+        long currentTime = SystemClock.uptimeMillis();
+        if(currentTime - mSampleStart > SAMPLE_INTERVAL) {
+            reset();
+            mSampleStart = currentTime;
+            doSample();
+        }
     }
 
-    void endSample() {
-        mSampleInterval = SystemClock.uptimeMillis() - mSampleStart;
-        mBusyTime = (long) (mSampleInterval * 1.2);
+    void recordSample() {
         doSample();
     }
 
@@ -89,14 +90,14 @@ class CpuSampler {
     }
 
     boolean isCpuBusy(long start, long end) {
-        if (end - start > mSampleInterval) {
-            long s = start - mSampleInterval;
-            long e = start + mSampleInterval;
+        if (end - start > SAMPLE_INTERVAL) {
+            long s = start - SAMPLE_INTERVAL;
+            long e = start + SAMPLE_INTERVAL;
             long last = 0;
             for (Map.Entry<Long, String> entry : mCpuInfoEntries.entrySet()) {
                 long time = entry.getKey();
                 if (s < time && time < e) {
-                    if (last != 0 && time - last > mBusyTime) {
+                    if (last != 0 && time - last > BUST_TIME) {
                         return true;
                     }
                     last = time;
