@@ -15,6 +15,7 @@ import android.os.Looper;
  */
 public class Config implements BlockMonitor.BlockObserver {
     private final Context mContext;
+    private final Looper MAIN_LOOPER = Looper.getMainLooper();
 
     public Config(Context context) {
         if(context == null) {
@@ -38,7 +39,7 @@ public class Config implements BlockMonitor.BlockObserver {
      * @return the looper you want to watch
      */
     public Looper provideWatchLooper() {
-        return Looper.getMainLooper();
+        return MAIN_LOOPER;
     }
 
     /**
@@ -91,8 +92,21 @@ public class Config implements BlockMonitor.BlockObserver {
     }
 
     /**
-     * Path to save log, like "/blockcanary/", will save to sdcard if can, else we will save to
-     * "${context.getFilesDir()/${provideLogPath()}"}"
+     * we will save block log to sdcard by default, if you want to disable this, just return false
+     *
+     * Warning: if save log disabled, new BlockInfo will not be displayed in DisplayActivity
+     *
+     * Note: running in none ui thread
+     *
+     * @return false to disable save log
+     */
+    public boolean enableSaveLog() {
+        return true;
+    }
+
+    /**
+     * Path to save log, like "/blockcanary/", will save to sdcard if can. if we can't save log to sdcard (eg: no permission),
+     * we will save to "${context.getFilesDir()/${provideLogPath()}"}"
      *
      * Note: running in none ui thread
      *

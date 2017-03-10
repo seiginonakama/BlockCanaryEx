@@ -38,7 +38,10 @@ public class LogWriter {
     private static final BlockMonitor.BlockObserver BLOCK_OBSERVER = new BlockMonitor.BlockObserver() {
         @Override
         public void onBlock(BlockInfo blockInfo) {
-            save(blockInfo);
+            Config config = BlockCanaryEx.getConfig();
+            if(config != null && config.enableSaveLog()) {
+                save(blockInfo);
+            }
         }
     };
 

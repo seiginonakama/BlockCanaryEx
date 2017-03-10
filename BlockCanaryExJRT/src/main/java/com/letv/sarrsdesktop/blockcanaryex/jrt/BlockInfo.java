@@ -57,10 +57,16 @@ public class BlockInfo implements Serializable {
     private static final String KB = "KB";
     private static final Comparator<MethodInfo> COMPARATOR = new Comparator<MethodInfo>() {
         @Override
-        public int compare(MethodInfo lhs, MethodInfo rhs) {
-            long l = lhs.getCostThreadTime();
-            long r = rhs.getCostThreadTime();
-            return l < r ? 1 : (l == r ? 0 : -1);
+        public int compare(MethodInfo l, MethodInfo r) {
+            int result = -compare(l.getCostRealTimeNano(), r.getCostRealTimeNano());
+            if(result == 0) {
+                result = -compare(l.getCostThreadTime(), r.getCostThreadTime());
+            }
+            return result;
+        }
+
+        private int compare(long x, long y) {
+            return (x < y) ? -1 : ((x == y) ? 0 : 1);
         }
     };
 

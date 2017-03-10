@@ -12,7 +12,13 @@ public class MethodInfo {
     private long costRealTimeNano;
     private long costThreadTime;
 
+    private static final int MS_NANO = 1000000;
+
     public long getCostRealTimeMs() {
+        if(costRealTimeNano < MS_NANO && costRealTimeNano > MS_NANO / 2) {
+            //if costRealTimeNano > 0.5ms, return 1ms
+            return 1;
+        }
         return TimeUnit.NANOSECONDS.toMillis(costRealTimeNano);
     }
 
