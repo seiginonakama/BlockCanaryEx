@@ -1,6 +1,6 @@
 BlockCanaryEx
 =============
-[中文文档](https://github.com/lqcandqq13/BlockCanaryEx/blob/master/README.md)<br/>
+[中文文档](https://github.com/lqcandqq13/BlockCanaryEx/blob/master/README_CN.md)<br/>
 a library for android which can help you to find the most heavy method in your code when your app blocked,
 base on [BlockCanary](https://github.com/markzhai/AndroidPerformanceMonitor).
 
