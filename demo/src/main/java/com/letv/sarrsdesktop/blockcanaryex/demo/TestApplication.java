@@ -12,6 +12,10 @@ public class TestApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        BlockCanaryEx.install(new Config(this));
+        if(BuildConfig.DEBUG) {
+            //we don't suggest use BlockCanaryEx on release version
+            //TODO add no-op version BlockCanaryEx
+            BlockCanaryEx.install(new Config(this));
+        }
     }
 }
