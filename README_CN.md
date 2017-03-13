@@ -2,15 +2,15 @@ BlockCanaryEx
 =============
 [English doc](https://github.com/lqcandqq13/BlockCanaryEx/blob/master/README.md)<br/>
 记录主线程中执行的所有方法和它们的执行时间，当app卡顿时，将所有耗时方法直接展示给开发者，大量节省开发者定位卡顿问题的时间。
-此项目基于 [BlockCanary](https://github.com/markzhai/AndroidPerformanceMonitor).
+此项目基于 [BlockCanary](https://github.com/markzhai/AndroidPerformanceMonitor)。
 
 ![TextLayoutBuilder logo](./sample.png)
 
 BlockCanaryEx和BlockCanary的区别如下
 -------------
-- BlockCanaryEx基于BlockCanary,继承它的ui和大部分功能;
-- BlockCanaryEx添加了方法采样,知道主线程中所有方法的执行时间和执行次数;
-- 当应用卡顿时，BlockCanaryEx更关注app代码中，哪些方法耗时最多，重点记录和显示这些耗时方法.
+- BlockCanaryEx基于BlockCanary，继承它的ui和大部分功能;
+- BlockCanaryEx添加了方法采样，知道主线程中所有方法的执行时间和执行次数;
+- 当应用卡顿时，BlockCanaryEx更关注app代码中，哪些方法耗时最多，重点记录和显示这些耗时方法。
 
 安装
 -------------
@@ -59,7 +59,7 @@ done，现在BlockCanaryEx已经在app debug模式中生效。
 进阶使用
 -------------
 
-BlockCanaryEx在编译期，通过字节码注入，将方法采样器注入到你的代码中。字节码注入的代码范围，默认是你的project源码和subproject源码。project libs和subProject libs，external libs默认是不注入方法采样器的。如果你想扩大你的方法采样，监测更多的方法性能，你可以在build.gradle是修改字节码注入的范围。
+BlockCanaryEx在编译期，通过字节码注入，将方法采样器注入到你的代码中。字节码注入的代码范围，默认是你的project源码和subproject源码。project libs、subProject libs以及external libs默认是不注入方法采样器的。如果你想扩大你的方法采样，监测更多的方法性能，你可以在build.gradle中修改字节码注入的范围。
 
 ```groovy
   apply plugin: 'blockcanaryex'
