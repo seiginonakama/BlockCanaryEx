@@ -9,7 +9,7 @@ BlockCanaryEx
 BlockCanaryEx和BlockCanary的区别如下
 -------------
 - BlockCanaryEx基于BlockCanary,继承它的ui和大部分功能;
-- BlockCanaryEx添加了方法采样,知道所有方法的执行时间和执行次数;
+- BlockCanaryEx添加了方法采样,知道主线程中所有方法的执行时间和执行次数;
 - 当应用卡顿时，BlockCanaryEx更关注app代码中，哪些方法耗时最多，重点记录和显示这些耗时方法.
 
 安装
@@ -65,19 +65,19 @@ BlockCanaryEx在编译期，通过字节码注入，将方法采样器注入到�
   apply plugin: 'blockcanaryex'
 
   block {
-      debugEnabled true //enable MethodSampler when debug mode, default true
-      releaseEnabled false //enable MethodSampler when release mode, default false
-      excludePackages [] //exclude the package you don't want to inject MethodSampler, eg: ['com.android', 'android.support']
-      excludeClasses [] //exclude the class you don't want to inject MethodSampler
-      includePackages [] //only include the package you want to inject MethodSampler, packages which don't included will not be injected
+      debugEnabled true //在debug模式下开启方法采样，默认为true
+      releaseEnabled false //在release模式下开启方法采样，默认为false
+      excludePackages [] //不希望进行方法采样的包名, 比如: ['com.android', 'android.support']
+      excludeClasses [] //不希望进行方法采样的类名
+      includePackages [] //指定开启方法采样的包名，如果不为空，则其它没有包括进来的包都不会开启方法采样
 
-      scope {
-          project true //inject MethodSampler for app project, default true
-          projectLocalDep false //inject MethodSampler for app libs(eg: .jar), default false
-          subProject true //inject MethodSampler for subProject of app project, default true
-          subProjectLocalDep false //inject MethodSampler for subProject libs, default false
-          externalLibraries false //inject MethodSampler external libs, default false
-      }
+      scope {
+          project true //开启主项目代码方法采样，默认为true
+          projectLocalDep false //开启主项目本地libs代码(比如.jar)方法采样，默认为false,
+          subProject true //开启子项目代码方法采样，默认为true
+          subProjectLocalDep false //开启子项目本地libs方法采样，默认为false
+          externalLibraries false //开启第三方libs方法采样，默认为false
+      }
   }
  ```
 
