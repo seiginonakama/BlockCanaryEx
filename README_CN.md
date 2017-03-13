@@ -1,17 +1,18 @@
 BlockCanaryEx
 =============
-a library for android which can help you to find the most heavy method in your code when your app blocked,
-base on [BlockCanary](https://github.com/markzhai/AndroidPerformanceMonitor).
+[English doc](https://github.com/lqcandqq13/BlockCanaryEx/blob/master/README_EN.md)
+记录主线程中执行的所有方法和它们的执行时间，当app卡顿时，将所有耗时方法直接展示给开发者，大量节省开发者定位卡顿问题的时间。
+此项目基于 [BlockCanary](https://github.com/markzhai/AndroidPerformanceMonitor).
 
 ![TextLayoutBuilder logo](./sample.png)
 
-What's the difference between BlockCanaryEx and BlockCanary
+BlockCanaryEx和BlockCanary的区别如下
 -------------
-- BlockCanaryEx base on BlockCanary, inherit it's ui and most of features;
-- BlockCanaryEx add MethodSampler, knows every method's execute info (like cost-time, called-times...) when blocked;
-- BlockCanaryEx focus on the method which cost most of time when your app blocked, and display it directly to developer.
+- BlockCanaryEx基于BlockCanary,继承它的ui和大部分功能;
+- BlockCanaryEx添加了方法采样,知道所有方法的执行时间和执行次数;
+- 当应用卡顿时，BlockCanaryEx更关注app代码中，哪些方法耗时最多，重点记录和显示这些耗时方法.
 
-Download
+安装
 -------------
 root build.gradle
 ```groovy
@@ -34,10 +35,10 @@ apply plugin: 'blockcanaryex'
 compile 'com.letv.sarrsdesktop:BlockCanaryExJRT:0.9.3'
 ```
 
-Basic Usage
+基础使用
 -------------
 
-init BlockCanaryEx when your application created
+在应用application onCreate()时，初始化BlockCanaryEx
 
 ```java
 public class TestApplication extends Application {
@@ -53,15 +54,12 @@ public class TestApplication extends Application {
 }
 ```
 
-done, now BlockCanaryEx be enabled when you app in debug mode.
+done，现在BlockCanaryEx已经在app debug模式中生效。
 
-Advance Usage
+进阶使用
 -------------
 
-BlockCanaryEx do method sample by inject MethodSampler into your code when compile time,
-the scope to inject MethodSampler is the src of your project and subProject by default.
-projectLocalDep, subProjectLocalDep, externalLibraries is ignored. If you want to change
-the scope to watch more method performance, you can do the config in gradle.
+BlockCanaryEx在编译期，通过字节码注入，将方法采样器注入到你的代码中。字节码注入的代码范围，默认是你的project源码和subproject源码。project libs和subProject libs，external libs默认是不注入方法采样器的。如果你想扩大你的方法采样，监测更多的方法性能，你可以在build.gradle是修改字节码注入的范围。
 
 ```groovy
   apply plugin: 'blockcanaryex'
@@ -83,7 +81,7 @@ the scope to watch more method performance, you can do the config in gradle.
   }
  ```
 
-you also can override more Config method to customize BlockCanaryEx runtime
+你也可能以通过覆写更多的Config方法，来定制BlockCanaryEx的运行时表现。
 
 ```java
   public class TestApplication extends Application {
