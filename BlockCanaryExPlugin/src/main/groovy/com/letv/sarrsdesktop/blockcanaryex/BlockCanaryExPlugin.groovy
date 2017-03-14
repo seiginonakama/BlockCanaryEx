@@ -90,7 +90,7 @@ public class BlockCanaryExPlugin implements Plugin<Project> {
                     Collection<JarInput> jarInputs = transformInput.getJarInputs();
                     for (JarInput jarInput : jarInputs) {
                         classPath.add(jarInput.getFile())
-                        String name = HashUtil.createHash(jarInput.getFile(), "MD5")
+                        String name = HashUtil.createHash(jarInput.getFile(), "MD5").asHexString()
                         File output = transformInvocation.outputProvider.getContentLocation(
                                 name, jarInput.getContentTypes(),
                                 jarInput.getScopes(), Format.JAR);
