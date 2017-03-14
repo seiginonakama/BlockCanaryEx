@@ -64,7 +64,7 @@ public class LogWriter {
         }
     }
 
-    public static void notifyNewLog(File logFile) {
+    private static void notifyNewLog(File logFile) {
         for(WeakReference<LogListener> listenerWeakRef : LOG_LISTENERS) {
             LogListener logListener = listenerWeakRef.get();
             if(logListener != null) {
@@ -82,7 +82,7 @@ public class LogWriter {
      *
      * @param serializable block info
      */
-    public static void save(final Serializable serializable) {
+    private static void save(final Serializable serializable) {
         WriteLogHandler.getInstance().post(new Runnable() {
             @Override
             public void run() {
@@ -199,7 +199,7 @@ public class LogWriter {
         return path;
     }
 
-    static String getPath() {
+    private static String getPath() {
         String state = Environment.getExternalStorageState();
         Config config = BlockCanaryEx.getConfig();
         String logPath = config
@@ -213,7 +213,7 @@ public class LogWriter {
         return context.getFilesDir().getAbsolutePath() + logPath;
     }
 
-    static File detectedBlockDirectory() {
+    private static File detectedBlockDirectory() {
         File directory = new File(getPath());
         if (!directory.exists()) {
             directory.mkdirs();

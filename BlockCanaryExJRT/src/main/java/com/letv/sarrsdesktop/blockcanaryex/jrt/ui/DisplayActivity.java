@@ -189,13 +189,6 @@ public class DisplayActivity extends Activity implements LogWriter.LogListener {
         }
     }
 
-    private void shareBlock(BlockInfoEx blockInfo) {
-        Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.setType("text/plain");
-        intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(blockInfo.logFile));
-        startActivity(Intent.createChooser(intent, getString(R.string.block_canary_share_with)));
-    }
-
     private void shareHeapDump(BlockInfoEx blockInfo) {
         File heapDumpFile = blockInfo.logFile;
 
@@ -300,9 +293,6 @@ public class DisplayActivity extends Activity implements LogWriter.LogListener {
     }
 
     private BlockInfoEx getBlock(String startTime) {
-        if (mBlockInfoEntries == null) {
-            return null;
-        }
         for (BlockInfoEx blockInfo : mBlockInfoEntries) {
             if (startTime != null && startTime.equals(blockInfo.getStartTime())) {
                 return blockInfo;
@@ -311,7 +301,7 @@ public class DisplayActivity extends Activity implements LogWriter.LogListener {
         return null;
     }
 
-    class BlockListAdapter extends BaseAdapter {
+    private class BlockListAdapter extends BaseAdapter {
 
         @Override
         public int getCount() {
@@ -354,7 +344,7 @@ public class DisplayActivity extends Activity implements LogWriter.LogListener {
         }
     }
 
-    static class LoadBlocks implements Runnable {
+    private static class LoadBlocks implements Runnable {
 
         static final List<LoadBlocks> inFlight = new ArrayList<>();
         static final Executor backgroundExecutor = Executors.newSingleThreadExecutor();

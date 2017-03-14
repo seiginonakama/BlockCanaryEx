@@ -7,7 +7,7 @@ import android.os.Looper;
 /**
  * author: zhoulei date: 2017/2/28.
  */
-public class SamplerReportHandler extends Handler {
+class SamplerReportHandler extends Handler {
     private static volatile SamplerReportHandler sInstance;
     private static HandlerThread sHandlerThread = new HandlerThread("BlockCanaryExSampler");
 
@@ -15,7 +15,7 @@ public class SamplerReportHandler extends Handler {
         super(looper);
     }
 
-    public static SamplerReportHandler getInstance() {
+    static SamplerReportHandler getInstance() {
         if(sInstance == null) {
             synchronized (SamplerReportHandler.class) {
                 if(sInstance == null) {

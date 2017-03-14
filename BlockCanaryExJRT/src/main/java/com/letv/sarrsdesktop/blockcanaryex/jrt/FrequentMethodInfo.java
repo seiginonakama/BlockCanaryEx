@@ -4,11 +4,11 @@ package com.letv.sarrsdesktop.blockcanaryex.jrt;
  * author: zhoulei date: 2017/3/3.
  */
 public class FrequentMethodInfo {
-    private com.letv.sarrsdesktop.blockcanaryex.jrt.MethodInfo methodInfo;
+    private MethodInfo methodInfo;
     private int calledTimes;
     private long totalCostRealTimeMs;
 
-    FrequentMethodInfo(com.letv.sarrsdesktop.blockcanaryex.jrt.MethodInfo methodInfo, int calledTimes, long totalCostRealTimeMs) {
+    FrequentMethodInfo(MethodInfo methodInfo, int calledTimes, long totalCostRealTimeMs) {
         this.methodInfo = methodInfo;
         this.calledTimes = calledTimes;
         this.totalCostRealTimeMs = totalCostRealTimeMs;

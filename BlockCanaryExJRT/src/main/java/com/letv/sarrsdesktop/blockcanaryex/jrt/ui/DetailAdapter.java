@@ -47,7 +47,7 @@ final class DetailAdapter extends BaseAdapter {
     private static final int POSITION_HEAVY_METHOD = 5;
     private static final int POSITION_FREQUENT_METHOD = 6;
 
-    private static final String FLODING_SUFFIX = "…";
+    private static final String FOLDING_SUFFIX = "…";
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
@@ -102,7 +102,7 @@ final class DetailAdapter extends BaseAdapter {
                 break;
             case POSITION_ENV:
                 if (folding) {
-                    htmlString = htmlString.substring(0, htmlString.indexOf(BlockInfo.KEY_TOTAL_MEMORY)) + FLODING_SUFFIX;
+                    htmlString = htmlString.substring(0, htmlString.indexOf(BlockInfo.KEY_TOTAL_MEMORY)) + FOLDING_SUFFIX;
                 }
                 htmlString = String.format("<font color='#ffff00'>%s</font> ", htmlString);
                 break;
@@ -114,14 +114,14 @@ final class DetailAdapter extends BaseAdapter {
                 break;
             case POSITION_HEAVY_METHOD:
                 if (folding && htmlString.length() > 600) {
-                   htmlString = htmlString.substring(0, 600) + FLODING_SUFFIX;
+                   htmlString = htmlString.substring(0, 600) + FOLDING_SUFFIX;
                 }
                 htmlString = String.format("<font color='#00ff00'>%s</font> ", htmlString);
                 break;
             case POSITION_FREQUENT_METHOD:
             default:
                 if (folding && htmlString.length() > 600) {
-                    htmlString = htmlString.substring(0, 600) + FLODING_SUFFIX;
+                    htmlString = htmlString.substring(0, 600) + FOLDING_SUFFIX;
                 }
                 htmlString = String.format("<font color='#ffffff'>%s</font> ", htmlString);
                 break;
@@ -129,7 +129,7 @@ final class DetailAdapter extends BaseAdapter {
         return htmlString + "<br>";
     }
 
-    public void update(BlockInfo blockInfo) {
+    void update(BlockInfo blockInfo) {
         if (mBlockInfo != null && blockInfo.getStartTime().equals(mBlockInfo.getStartTime())) {
             // Same data, nothing to change.
             return;
@@ -140,7 +140,7 @@ final class DetailAdapter extends BaseAdapter {
         notifyDataSetChanged();
     }
 
-    public void toggleRow(int position) {
+    void toggleRow(int position) {
         mFoldings[position] = !mFoldings[position];
         notifyDataSetChanged();
     }

@@ -40,7 +40,7 @@ public final class DisplayConnectorView extends View {
         clearPaint.setXfermode(BlockCanaryUi.CLEAR_XFER_MODE);
     }
 
-    public enum Type {
+    enum Type {
         START, NODE, END
     }
 

@@ -11,10 +11,10 @@ import java.io.IOException;
  * author: zhoulei date: 2017/3/2.
  */
 
-public class BlockInfoEx extends BlockInfo {
-    public File logFile;
+class BlockInfoEx extends BlockInfo {
+    File logFile;
 
-    public static BlockInfoEx newInstance(File logFile) throws IOException, ClassNotFoundException, SerializeException {
+    static BlockInfoEx newInstance(File logFile) throws IOException, ClassNotFoundException, SerializeException {
         Long fileLength = logFile.length();
         byte[] content = new byte[fileLength.intValue()];
         FileInputStream in = null;
