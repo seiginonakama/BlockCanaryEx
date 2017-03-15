@@ -19,8 +19,6 @@ import com.letv.sarrsdesktop.blockcanaryex.jrt.BlockInfo;
 import com.letv.sarrsdesktop.blockcanaryex.jrt.internal.SerializeException;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 
 /**
  * author: zhoulei date: 2017/3/2.
@@ -29,24 +27,10 @@ import java.io.IOException;
 class BlockInfoEx extends BlockInfo {
     File logFile;
 
-    static BlockInfoEx newInstance(File logFile) throws IOException, ClassNotFoundException, SerializeException {
-        Long fileLength = logFile.length();
-        byte[] content = new byte[fileLength.intValue()];
-        FileInputStream in = null;
-        try {
-            in = new FileInputStream(logFile);
-            in.read(content);
-            in.close();
-        } finally {
-            if(in != null) {
-                in.close();
-            }
-        }
-
-        String src = new String(content, "UTF-8");
+    static BlockInfoEx newInstance(File logFile) throws SerializeException {
         BlockInfoEx blockInfoEx = new BlockInfoEx();
         blockInfoEx.logFile = logFile;
-        blockInfoEx.deserialize(src);
+        blockInfoEx.deserialize(logFile);
         return blockInfoEx;
     }
 }

@@ -15,11 +15,31 @@
  */
 package com.letv.sarrsdesktop.blockcanaryex.jrt.internal;
 
+import com.letv.sarrsdesktop.blockcanaryex.jrt.BlockInfo;
+
 /**
  * author: zhoulei date: 2017/3/2.
  */
-public class SerializeException extends Exception {
-    public SerializeException(String s, Throwable e) {
-        super(s, e);
+public class BlockMonitor {
+    public interface BlockObserver {
+        void onBlock(BlockInfo blockInfo);
+    }
+
+    public static void registerBlockObserver(BlockObserver blockObserver) {
+    }
+
+    public static void ensureMonitorInstalled() {
+    }
+
+    public static void reportMethodProfile(final String cls, final String method, final String paramTypes, final long startTimeNano, final long startThreadTime,
+                                           final long endTimeNano, final long endThreadTime) {
+    }
+
+    public static long getLoopStartTime() {
+        return 0;
+    }
+
+    public static long getLoopStartThreadTime() {
+        return 0;
     }
 }

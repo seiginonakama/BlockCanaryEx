@@ -1,3 +1,4 @@
 include ':demo'
+include ':BlockCanaryExJRTNoOp'
 include ':BlockCanaryExJRT'
 include ':BlockCanaryExPlugin'

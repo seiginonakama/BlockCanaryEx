@@ -23,6 +23,10 @@ import com.letv.sarrsdesktop.blockcanaryex.jrt.internal.TimeUtils;
 
 import android.os.Build;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -35,6 +39,8 @@ import java.util.concurrent.TimeUnit;
  * author: zhoulei date: 2017/3/2.
  */
 public class BlockInfo implements Serializable {
+    private static final String TAG = "BlockInfo";
+
     private static final String MODEL = Build.MODEL;
     private static final int API_LEVEL = Build.VERSION.SDK_INT;
 
@@ -46,12 +52,8 @@ public class BlockInfo implements Serializable {
     public static final String KEY_END_TIME = "time-end";
     public static final String KEY_TOP_HEAVY_METHOD = "top-heavy-method";
     public static final String KEY_TOP_FREQUENT_METHOD = "top-frequent-heavy-method";
-    public static final String KEY_HEAVY_METHOD = "---------------heavy-method-start---------------";
-    public static final String KEY_HEAVY_METHOD_END = "---------------heavy-method-end---------------";
-    public static final String KEY_FREQUENT_METHOD = "---------------frequent-method-start---------------";
-    public static final String KEY_FREQUENT_METHOD_END = "---------------frequent-method-end---------------";
+    public static final String KEY_TIMESTAMP = "time-stamp";
 
-    private static final String KEY_ENVIRONMENT = "---------------environment-start---------------";
     public static final String KEY_PROCESS_NAME = "process-name";
     public static final String KEY_CPU_CORE_NUMBER = "cpu-core-number";
     public static final String KEY_CPU_RATE_INFO = "cpu-rate-info";
@@ -63,9 +65,13 @@ public class BlockInfo implements Serializable {
     public static final String KEY_NETWORK_TYPE = "network-type";
     public static final String KEY_QUALIFIER = "qualifier";
     public static final String KEY_UID = "uid";
-    private static final String KEY_ENVIRONMENT_END = "---------------environment-end---------------";
 
-    public static final String KEY_TIMESTAMP = "time-stamp";
+    private static final String KEY_HEAVY_METHOD = "---------------heavy-method-start---------------";
+    private static final String KEY_HEAVY_METHOD_END = "---------------heavy-method-end---------------";
+    private static final String KEY_FREQUENT_METHOD = "---------------frequent-method-start---------------";
+    private static final String KEY_FREQUENT_METHOD_END = "---------------frequent-method-end---------------";
+    private static final String KEY_ENVIRONMENT = "---------------environment-start---------------";
+    private static final String KEY_ENVIRONMENT_END = "---------------environment-end---------------";
 
     private static final String KV = " = ";
     private static final String MS = "ms";
@@ -105,10 +111,6 @@ public class BlockInfo implements Serializable {
     private String topFrequentMethod;
     private String frequentMethods;
     private String envInfo;
-
-    public BlockInfo() {
-
-    }
 
     public static BlockInfo newInstance(long startTime, long blockRealTime, long blockThreadTime, List<MethodInfo> methodInfoList, String cpuRateInfo, boolean isCpuBusy) {
         BlockInfo blockInfo = new BlockInfo();
@@ -292,90 +294,110 @@ public class BlockInfo implements Serializable {
     }
 
     @Override
-    public void deserialize(String src) throws SerializeException {
-        String[] lines = src.split(SEPARATOR);
-        boolean heavyMethodsStart = false;
-        boolean frequentMethodsStart = false;
-        boolean envInfoStart = false;
-        StringBuilder heavyMethodsBuilder = new StringBuilder();
-        StringBuilder frequentMethodsBuilder = new StringBuilder();
-        StringBuilder envInfoBuilder = new StringBuilder();
-        for (String line : lines) {
-            if (heavyMethodsStart) {
-                if (line.equals(KEY_HEAVY_METHOD_END)) {
-                    heavyMethodsStart = false;
-                } else {
-                    heavyMethodsBuilder.append(line).append(SEPARATOR);
+    public void deserialize(File file) throws SerializeException {
+        BufferedReader reader = null;
+        Throwable closeException = null;
+
+        try {
+            InputStreamReader in = new InputStreamReader(new FileInputStream(file), "UTF-8");
+            reader = new BufferedReader(in);
+            boolean heavyMethodsStart = false;
+            boolean frequentMethodsStart = false;
+            boolean envInfoStart = false;
+            StringBuilder heavyMethodsBuilder = new StringBuilder();
+            StringBuilder frequentMethodsBuilder = new StringBuilder();
+            StringBuilder envInfoBuilder = new StringBuilder();
+            for (String line = reader.readLine(); line != null; line = reader.readLine()) {
+                if (heavyMethodsStart) {
+                    if (line.equals(KEY_HEAVY_METHOD_END)) {
+                        heavyMethodsStart = false;
+                    } else {
+                        heavyMethodsBuilder.append(line).append(SEPARATOR);
+                    }
+                    continue;
                 }
-                continue;
-            }
-            if (frequentMethodsStart) {
-                if (line.equals(KEY_FREQUENT_METHOD_END)) {
-                    frequentMethodsStart = false;
-                } else {
-                    frequentMethodsBuilder.append(line).append(SEPARATOR);
+                if (frequentMethodsStart) {
+                    if (line.equals(KEY_FREQUENT_METHOD_END)) {
+                        frequentMethodsStart = false;
+                    } else {
+                        frequentMethodsBuilder.append(line).append(SEPARATOR);
+                    }
+                    continue;
                 }
-                continue;
-            }
-            if (envInfoStart) {
-                if (line.equals(KEY_ENVIRONMENT_END)) {
-                    envInfoStart = false;
-                } else {
-                    envInfoBuilder.append(line).append(SEPARATOR);
+                if (envInfoStart) {
+                    if (line.equals(KEY_ENVIRONMENT_END)) {
+                        envInfoStart = false;
+                    } else {
+                        envInfoBuilder.append(line).append(SEPARATOR);
+                    }
+                    continue;
                 }
-                continue;
+                String prefix = KEY_START_TIME + KV;
+                if (line.startsWith(prefix)) {
+                    startTime = line.substring(prefix.length());
+                    continue;
+                }
+                prefix = KEY_END_TIME + KV;
+                if (line.startsWith(prefix)) {
+                    endTime = line.substring(prefix.length());
+                    continue;
+                }
+                prefix = KEY_BlOCK_TIME + KV;
+                if (line.startsWith(prefix)) {
+                    blockRealTime = line.substring(prefix.length());
+                    continue;
+                }
+                prefix = KEY_BLOCK_THREAD_TIME + KV;
+                if (line.startsWith(prefix)) {
+                    blockThreadTime = line.substring(prefix.length());
+                    continue;
+                }
+                prefix = KEY_TOP_HEAVY_METHOD + KV;
+                if (line.startsWith(prefix)) {
+                    topHeavyMethod = line.substring(prefix.length());
+                    continue;
+                }
+                prefix = KEY_TOP_FREQUENT_METHOD + KV;
+                if (line.startsWith(prefix)) {
+                    topFrequentMethod = line.substring(prefix.length());
+                    continue;
+                }
+                prefix = KEY_TIMESTAMP + KV;
+                if(line.startsWith(prefix)) {
+                    timestamp = Long.valueOf(line.substring(prefix.length()));
+                    continue;
+                }
+                prefix = KEY_HEAVY_METHOD;
+                if (line.startsWith(prefix)) {
+                    heavyMethodsStart = true;
+                    continue;
+                }
+                prefix = KEY_FREQUENT_METHOD;
+                if (line.startsWith(prefix)) {
+                    frequentMethodsStart = true;
+                }
+                prefix = KEY_ENVIRONMENT;
+                if(line.startsWith(prefix)) {
+                    envInfoStart = true;
+                }
             }
-            String prefix = KEY_START_TIME + KV;
-            if (line.startsWith(prefix)) {
-                startTime = line.substring(prefix.length());
-                continue;
-            }
-            prefix = KEY_END_TIME + KV;
-            if (line.startsWith(prefix)) {
-                endTime = line.substring(prefix.length());
-                continue;
-            }
-            prefix = KEY_BlOCK_TIME + KV;
-            if (line.startsWith(prefix)) {
-                blockRealTime = line.substring(prefix.length());
-                continue;
-            }
-            prefix = KEY_BLOCK_THREAD_TIME + KV;
-            if (line.startsWith(prefix)) {
-                blockThreadTime = line.substring(prefix.length());
-                continue;
-            }
-            prefix = KEY_TOP_HEAVY_METHOD + KV;
-            if (line.startsWith(prefix)) {
-                topHeavyMethod = line.substring(prefix.length());
-                continue;
-            }
-            prefix = KEY_TOP_FREQUENT_METHOD + KV;
-            if (line.startsWith(prefix)) {
-                topFrequentMethod = line.substring(prefix.length());
-                continue;
-            }
-            prefix = KEY_TIMESTAMP + KV;
-            if(line.startsWith(prefix)) {
-                timestamp = Long.valueOf(line.substring(prefix.length()));
-                continue;
-            }
-            prefix = KEY_HEAVY_METHOD;
-            if (line.startsWith(prefix)) {
-                heavyMethodsStart = true;
-                continue;
-            }
-            prefix = KEY_FREQUENT_METHOD;
-            if (line.startsWith(prefix)) {
-                frequentMethodsStart = true;
-            }
-            prefix = KEY_ENVIRONMENT;
-            if(line.startsWith(prefix)) {
-                envInfoStart = true;
+            heavyMethods = heavyMethodsBuilder.toString();
+            frequentMethods = frequentMethodsBuilder.toString();
+            envInfo = envInfoBuilder.toString();
+        } catch (Throwable e) {
+            throw new SerializeException("BlockInfo deserialize failed", e);
+        } finally {
+            try {
+                if (reader != null) {
+                    reader.close();
+                }
+            } catch (Throwable e) {
+                closeException = e;
             }
         }
-        heavyMethods = heavyMethodsBuilder.toString();
-        frequentMethods = frequentMethodsBuilder.toString();
-        envInfo = envInfoBuilder.toString();
+
+        if(closeException != null) {
+            throw new SerializeException("BlockInfo file io close deserialize failed", closeException);
+        }
     }
 }

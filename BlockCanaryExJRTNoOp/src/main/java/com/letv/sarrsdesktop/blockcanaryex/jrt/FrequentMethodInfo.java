@@ -13,13 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.letv.sarrsdesktop.blockcanaryex.jrt.internal;
+package com.letv.sarrsdesktop.blockcanaryex.jrt;
 
 /**
- * author: zhoulei date: 2017/3/2.
+ * author: zhoulei date: 2017/3/3.
  */
-public class SerializeException extends Exception {
-    public SerializeException(String s, Throwable e) {
-        super(s, e);
+public class FrequentMethodInfo {
+    public String getClassName() {
+        return null;
+    }
+
+    public String getMethodName() {
+        return null;
+    }
+
+    public String getParamTypes() {
+        return null;
+    }
+
+    public int getCalledTimes() {
+        return 0;
+    }
+
+    public long getTotalCostRealTimeMs() {
+        return 0;
     }
 }

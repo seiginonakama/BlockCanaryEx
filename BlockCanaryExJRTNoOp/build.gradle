@@ -35,7 +35,7 @@ install {
         pom {
             project {
                 packaging 'aar'
-                name 'blockcanaryex-jrt'
+                name 'blockcanaryex-jrt-no-op'
                 url siteUrl
                 licenses {
                     license {
@@ -93,7 +93,7 @@ bintray {
     configurations = ['archives']
     pkg {
         repo = "maven"
-        name = "blockcanaryex-jrt"
+        name = "blockcanaryex-jrt-no-op"
         websiteUrl = siteUrl
         vcsUrl = gitUrl
         licenses = ["Apache-2.0"]
