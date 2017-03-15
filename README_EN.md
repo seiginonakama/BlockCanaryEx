@@ -9,7 +9,7 @@ base on [BlockCanary](https://github.com/markzhai/AndroidPerformanceMonitor).
 
 What's the difference between BlockCanaryEx and BlockCanary
 -------------
-- BlockCanaryEx base on BlockCanary, inherit it's ui and most of features;
+- BlockCanaryEx java runtime code are modified form BlockCanary, ui and features are mostly same;
 - BlockCanaryEx add MethodSampler, knows every method's execute info (like cost-time, called-times...) when blocked;
 - BlockCanaryEx focus on the method which cost most of time when your app blocked, and display it directly to developer.
 
@@ -33,7 +33,7 @@ apply plugin: 'blockcanaryex'
 ```
 
 ```groovy
-compile 'com.letv.sarrsdesktop:BlockCanaryExJRT:0.9.3'
+compile 'com.letv.sarrsdesktop:BlockCanaryExJRT:0.9.3.1'
 ```
 
 Basic Usage
