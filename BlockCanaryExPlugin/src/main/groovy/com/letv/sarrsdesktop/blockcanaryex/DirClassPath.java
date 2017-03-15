@@ -1,3 +1,4 @@
+//copy form javassist
 package com.letv.sarrsdesktop.blockcanaryex;
 
 import java.io.File;
