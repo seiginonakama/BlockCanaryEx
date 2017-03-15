@@ -22,10 +22,10 @@ import android.os.SystemClock;
 import android.util.Printer;
 
 class LooperMonitor implements Printer {
-    private static final char START_CHAR = '>';
     private long mStartTimestamp = 0;
     private long mStartThreadTimestamp = 0;
     private BlockListener mBlockListener = null;
+    private boolean mPrintingStarted = false;
 
     interface BlockListener {
         void onStart();
@@ -55,7 +55,8 @@ class LooperMonitor implements Printer {
 
     @Override
     public void println(String x) {
-        if(x.charAt(0) == START_CHAR) {
+        if(!mPrintingStarted) {
+            mPrintingStarted = true;
             mStartTimestamp = System.currentTimeMillis();
             mStartThreadTimestamp = SystemClock.currentThreadTimeMillis();
             SamplerReportHandler.getInstance().post(new Runnable() {
@@ -65,6 +66,7 @@ class LooperMonitor implements Printer {
                 }
             });
         } else {
+            mPrintingStarted = false;
             final Config config = BlockCanaryEx.getConfig();
             if(config == null) {
                 return;
