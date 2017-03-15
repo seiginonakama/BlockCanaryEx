@@ -1,19 +1,19 @@
-[中文文档](https://github.com/lqcandqq13/BlockCanaryEx/blob/master/README_CN.md)<br/>
+[English doc](https://github.com/lqcandqq13/BlockCanaryEx/blob/master/README.md)<br/>
 
 BlockCanaryEx
 =============
-a library for android which can help you to find the most heavy method in your code when your app blocked,
-base on [BlockCanary](https://github.com/markzhai/AndroidPerformanceMonitor).
+记录主线程中执行的所有方法和它们的执行时间，当app卡顿时，将所有耗时方法直接展示给开发者，大量节省开发者定位卡顿问题的时间。
+此项目基于 [BlockCanary](https://github.com/markzhai/AndroidPerformanceMonitor)。
 
 ![TextLayoutBuilder logo](./sample.png)
 
-What's the difference between BlockCanaryEx and BlockCanary
+BlockCanaryEx和BlockCanary的区别如下
 -------------
-- BlockCanaryEx java runtime code are modified form BlockCanary, ui and features are mostly same;
-- BlockCanaryEx add MethodSampler, knows every method's execute info (like cost-time, called-times...) when blocked;
-- BlockCanaryEx focus on the method which cost most of time when your app blocked, and display it directly to developer.
+- BlockCanaryEx的运行时代码复制或修改自BlockCanary，ui和大部分功能基本一致;
+- BlockCanaryEx添加了方法采样，知道主线程中所有方法的执行时间和执行次数;
+- 当应用卡顿时，BlockCanaryEx更关注app代码中，哪些方法耗时最多，重点记录和显示这些耗时方法。
 
-Download
+安装
 -------------
 root build.gradle
 ```groovy
@@ -33,13 +33,13 @@ apply plugin: 'blockcanaryex'
 ```
 
 ```groovy
-compile 'com.letv.sarrsdesktop:BlockCanaryExJRT:0.9.3.3'
+compile 'com.letv.sarrsdesktop:BlockCanaryExJRT:0.9.3.4'
 ```
 
-Basic Usage
+基础使用
 -------------
 
-init BlockCanaryEx when your application created
+在应用application onCreate()时，初始化BlockCanaryEx
 
 ```java
 public class TestApplication extends Application {
@@ -55,37 +55,34 @@ public class TestApplication extends Application {
 }
 ```
 
-done, now BlockCanaryEx be enabled when you app in debug mode.
+done，现在BlockCanaryEx已经在app debug模式中生效。
 
-Advance Usage
+进阶使用
 -------------
 
-BlockCanaryEx do method sample by inject MethodSampler into your code when compile time,
-the scope to inject MethodSampler is the src of your project and subProject by default.
-projectLocalDep, subProjectLocalDep, externalLibraries is ignored. If you want to change
-the scope to watch more method performance, you can do the config in gradle.
+BlockCanaryEx在编译期，通过字节码注入，将方法采样器注入到你的代码中。字节码注入的代码范围，默认是你的project源码和subproject源码。project libs、subProject libs以及external libs默认是不注入方法采样器的。如果你想扩大你的方法采样，监测更多的方法性能，你可以在build.gradle中修改字节码注入的范围。
 
 ```groovy
   apply plugin: 'blockcanaryex'
 
   block {
-      debugEnabled true //enable MethodSampler when debug mode, default true
-      releaseEnabled false //enable MethodSampler when release mode, default false
-      excludePackages [] //exclude the package you don't want to inject MethodSampler, eg: ['com.android', 'android.support']
-      excludeClasses [] //exclude the class you don't want to inject MethodSampler
-      includePackages [] //only include the package you want to inject MethodSampler, packages which don't included will not be injected
+      debugEnabled true //在debug模式下开启方法采样，默认为true
+      releaseEnabled false //在release模式下开启方法采样，默认为false
+      excludePackages [] //不希望进行方法采样的包名, 比如: ['com.android', 'android.support']
+      excludeClasses [] //不希望进行方法采样的类名
+      includePackages [] //指定开启方法采样的包名，如果不为空，则其它没有包括进来的包都不会开启方法采样
 
-      scope {
-          project true //inject MethodSampler for app project, default true
-          projectLocalDep false //inject MethodSampler for app libs(eg: .jar), default false
-          subProject true //inject MethodSampler for subProject of app project, default true
-          subProjectLocalDep false //inject MethodSampler for subProject libs, default false
-          externalLibraries false //inject MethodSampler external libs, default false
-      }
+      scope {
+          project true //开启主项目代码方法采样，默认为true
+          projectLocalDep false //开启主项目本地libs代码(比如.jar)方法采样，默认为false,
+          subProject true //开启子项目代码方法采样，默认为true
+          subProjectLocalDep false //开启子项目本地libs方法采样，默认为false
+          externalLibraries false //开启第三方libs方法采样，默认为false
+      }
   }
  ```
 
-you also can override more Config method to customize BlockCanaryEx runtime
+你也可能以通过覆写更多的Config方法，来定制BlockCanaryEx的运行时表现。
 
 ```java
   public class TestApplication extends Application {

@@ -17,7 +17,6 @@ package com.letv.sarrsdesktop.blockcanaryex.jrt.internal;
 
 import com.letv.sarrsdesktop.blockcanaryex.jrt.BlockInfo;
 
-import android.os.SystemClock;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -51,21 +50,16 @@ class CpuSampler {
     private long mTotalLast = 0;
     private long mAppCpuTimeLast = 0;
 
-    private long mSampleStart = 0;
-
     private static final CpuSampler sInstance = new CpuSampler();
 
     static CpuSampler getInstance() {
         return sInstance;
     }
 
-    void resetSampleIfNoFresh() {
-        long currentTime = SystemClock.uptimeMillis();
-        if(currentTime - mSampleStart > SAMPLE_INTERVAL) {
-            reset();
-            mSampleStart = currentTime;
-            doSample();
-        }
+    void resetSampler(int pid) {
+        mPid = pid;
+        reset();
+        doSample();
     }
 
     void recordSample() {
@@ -119,9 +113,6 @@ class CpuSampler {
                 cpuRate = "";
             }
 
-            if (mPid == 0) {
-                mPid = android.os.Process.myPid();
-            }
             pidReader = new BufferedReader(new InputStreamReader(
                     new FileInputStream("/proc/" + mPid + "/stat")), BUFFER_SIZE);
             String pidCpuRate = pidReader.readLine();
@@ -186,27 +177,29 @@ class CpuSampler {
             long idleTime = idle - mIdleLast;
             long totalTime = total - mTotalLast;
 
-            stringBuilder
-                    .append("cpu:")
-                    .append((totalTime - idleTime) * 100L / totalTime)
-                    .append("% ")
-                    .append("app:")
-                    .append((appCpuTime - mAppCpuTimeLast) * 100L / totalTime)
-                    .append("% ")
-                    .append("[")
-                    .append("user:").append((user - mUserLast) * 100L / totalTime)
-                    .append("% ")
-                    .append("system:").append((system - mSystemLast) * 100L / totalTime)
-                    .append("% ")
-                    .append("ioWait:").append((ioWait - mIoWaitLast) * 100L / totalTime)
-                    .append("% ]");
+            if(totalTime != 0) {
+                stringBuilder
+                        .append("cpu:")
+                        .append((totalTime - idleTime) * 100L / totalTime)
+                        .append("% ")
+                        .append("app:")
+                        .append((appCpuTime - mAppCpuTimeLast) * 100L / totalTime)
+                        .append("% ")
+                        .append("[")
+                        .append("user:").append((user - mUserLast) * 100L / totalTime)
+                        .append("% ")
+                        .append("system:").append((system - mSystemLast) * 100L / totalTime)
+                        .append("% ")
+                        .append("ioWait:").append((ioWait - mIoWaitLast) * 100L / totalTime)
+                        .append("% ]");
 
-            mCpuInfoEntries.put(System.currentTimeMillis(), stringBuilder.toString());
-            if (mCpuInfoEntries.size() > MAX_ENTRY_COUNT) {
-                for (Map.Entry<Long, String> entry : mCpuInfoEntries.entrySet()) {
-                    Long key = entry.getKey();
-                    mCpuInfoEntries.remove(key);
-                    break;
+                mCpuInfoEntries.put(System.currentTimeMillis(), stringBuilder.toString());
+                if (mCpuInfoEntries.size() > MAX_ENTRY_COUNT) {
+                    for (Map.Entry<Long, String> entry : mCpuInfoEntries.entrySet()) {
+                        Long key = entry.getKey();
+                        mCpuInfoEntries.remove(key);
+                        break;
+                    }
                 }
             }
         }

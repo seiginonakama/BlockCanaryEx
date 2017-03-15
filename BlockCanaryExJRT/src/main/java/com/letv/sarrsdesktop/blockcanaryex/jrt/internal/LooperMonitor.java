@@ -89,12 +89,7 @@ class LooperMonitor implements Printer {
     }
 
     private void notifyStart() {
-        SamplerReportHandler.getInstance().post(new Runnable() {
-            @Override
-            public void run() {
-                mBlockListener.onStart();
-            }
-        });
+        mBlockListener.onStart();
     }
 
     private void notifyBlockEvent(long startTime, long endTime, long startThreadTime, final long endThreadTime) {

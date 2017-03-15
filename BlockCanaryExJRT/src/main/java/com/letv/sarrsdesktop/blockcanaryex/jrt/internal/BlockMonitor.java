@@ -15,51 +15,93 @@
  */
 package com.letv.sarrsdesktop.blockcanaryex.jrt.internal;
 
+import com.letv.sarrsdesktop.blockcanaryex.jrt.BlockCanaryEx;
 import com.letv.sarrsdesktop.blockcanaryex.jrt.BlockInfo;
+import com.letv.sarrsdesktop.blockcanaryex.jrt.Config;
 import com.letv.sarrsdesktop.blockcanaryex.jrt.MethodInfo;
 
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Looper;
+import android.os.Process;
+import android.os.RemoteException;
+import android.os.SystemClock;
+import android.util.Log;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 /**
  * author: zhoulei date: 2017/3/2.
  */
 public class BlockMonitor {
+    private static final String TAG = "BlockMonitor";
+
     public interface BlockObserver {
         void onBlock(BlockInfo blockInfo);
     }
 
     private static MethodInfo[] sMethodInfoPool = new MethodInfo[512];
     private static int sPoolLastIndex = -1;
+    private static ISamplerService sSamplerService;
+    private static ConnectServiceFuture sConnectServiceFuture;
+    private static final byte[] SERVICE_FUTURE_LOCK = new byte[0];
+
+    private static long mLastResetCpuSamplerTime = 0;
+    private static final long CPU_SAMPLER_INTERVAL = 1000L;
+
+    private static final int MY_PID = Process.myPid();
 
     private static final LooperMonitor.BlockListener BLOCK_LISTENER = new LooperMonitor.BlockListener() {
         @Override
         public void onStart() {
-            CpuSampler.getInstance().resetSampleIfNoFresh();
+            long currentTime = SystemClock.uptimeMillis();
+            if (currentTime - mLastResetCpuSamplerTime > CPU_SAMPLER_INTERVAL) {
+                if (sSamplerService == null) {
+                    sSamplerService = getServiceSyncMayNull();
+                }
+                if (sSamplerService != null) {
+                    try {
+                        sSamplerService.resetCpuSampler(MY_PID);
+                        mLastResetCpuSamplerTime = currentTime;
+                    } catch (RemoteException e) {
+                        Log.d(TAG, "resetCpuSampler failed.", e);
+                    }
+                }
+            }
         }
 
         @Override
         public void onBlockEvent(long realStartTime, long realTimeEnd, long threadTimeStart, long threadTimeEnd) {
             List<MethodInfo> methodInfoList;
-            if(sPoolLastIndex < 0) {
+            if (sPoolLastIndex < 0) {
                 methodInfoList = Collections.EMPTY_LIST;
             } else {
                 methodInfoList = new ArrayList<>(sPoolLastIndex + 1);
-                for(int i = 0; i <= sPoolLastIndex; i++) {
+                for (int i = 0; i <= sPoolLastIndex; i++) {
                     methodInfoList.add(sMethodInfoPool[i]);
                 }
             }
             resetMethodInfoPool();
 
-            CpuSampler cpuSampler = CpuSampler.getInstance();
-            cpuSampler.recordSample();
+            String cpuRate = "";
+            boolean isBusy = false;
+            if (sSamplerService != null) {
+                try {
+                    CpuInfo cpuInfo = sSamplerService.getCurrentCpuInfo(realStartTime, realTimeEnd);
+                    cpuRate = cpuInfo.cpuRate;
+                    isBusy = cpuInfo.isBusy;
+                } catch (RemoteException e) {
+                    Log.d(TAG, "getCurrentCpuInfo() failed.", e);
+                }
+            }
             final BlockInfo blockInfo = BlockInfo.newInstance(realStartTime, realTimeEnd - realStartTime, threadTimeEnd - threadTimeStart,
-                    methodInfoList, cpuSampler.getCpuRateInfo(), cpuSampler.isCpuBusy(realStartTime, realTimeEnd));
+                    methodInfoList, cpuRate, isBusy);
             notifyBlocked(blockInfo);
         }
 
@@ -85,14 +127,6 @@ public class BlockMonitor {
         }
     }
 
-    public static void registerBlockObserver(BlockObserver blockObserver) {
-        sBlockObservers.add(new WeakReference<>(blockObserver));
-    }
-
-    public static void ensureMonitorInstalled() {
-        Looper.getMainLooper().setMessageLogging(LOOPER_MONITOR);
-    }
-
     public static void reportMethodProfile(final String cls, final String method, final String paramTypes, final long startTimeNano, final long startThreadTime,
                                            final long endTimeNano, final long endThreadTime) {
         SamplerReportHandler.getInstance().post(new Runnable() {
@@ -116,6 +150,16 @@ public class BlockMonitor {
         return LOOPER_MONITOR.getStartThreadTimestamp();
     }
 
+    public static void registerBlockObserver(BlockObserver blockObserver) {
+        sBlockObservers.add(new WeakReference<>(blockObserver));
+    }
+
+    //only running on main thread
+    public static void ensureMonitorInstalled() {
+        Looper.getMainLooper().setMessageLogging(LOOPER_MONITOR);
+        connectServiceIfNot();
+    }
+
     private static void resetMethodInfoPool() {
         sPoolLastIndex = -1;
     }
@@ -123,17 +167,57 @@ public class BlockMonitor {
     private static MethodInfo obtainMethodInfo() {
         sPoolLastIndex++;
 
-        if(sPoolLastIndex > sMethodInfoPool.length - 1) {
+        if (sPoolLastIndex > sMethodInfoPool.length - 1) {
             MethodInfo[] tmp = new MethodInfo[sMethodInfoPool.length * 2];
             System.arraycopy(sMethodInfoPool, 0, tmp, 0, sMethodInfoPool.length);
             sMethodInfoPool = tmp;
         }
 
         MethodInfo methodInfo = sMethodInfoPool[sPoolLastIndex];
-        if(methodInfo == null) {
+        if (methodInfo == null) {
             methodInfo = new MethodInfo();
             sMethodInfoPool[sPoolLastIndex] = methodInfo;
         }
         return methodInfo;
+    }
+
+    private static ISamplerService getServiceSyncMayNull() {
+        synchronized (SERVICE_FUTURE_LOCK) {
+            if (sConnectServiceFuture == null) {
+                return null;
+            } else {
+                try {
+                    return sConnectServiceFuture.get();
+                } catch (InterruptedException | ExecutionException e) {
+                    sConnectServiceFuture = null;
+                    Log.d(TAG, "connect service failed.", e);
+                }
+                return null;
+            }
+        }
+    }
+
+    private static void connectServiceIfNot() {
+        if (sConnectServiceFuture == null) {
+            synchronized (SERVICE_FUTURE_LOCK) {
+                if (sConnectServiceFuture == null) {
+                    sConnectServiceFuture = new ConnectServiceFuture() {
+                        @Override
+                        public synchronized void onServiceDisconnected(ComponentName name) {
+                            super.onServiceDisconnected(name);
+                            synchronized (SERVICE_FUTURE_LOCK) {
+                                sConnectServiceFuture = null;
+                            }
+                        }
+                    };
+                }
+            }
+            Config config = BlockCanaryEx.getConfig();
+            if (config != null) {
+                Context context = config.getContext();
+                Intent intent = new Intent(context, BlockSamplerService.class);
+                context.bindService(intent, sConnectServiceFuture, Context.BIND_AUTO_CREATE);
+            }
+        }
     }
 }
