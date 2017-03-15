@@ -20,7 +20,6 @@ import com.letv.sarrsdesktop.blockcanaryex.jrt.BlockInfo;
 import com.letv.sarrsdesktop.blockcanaryex.jrt.Config;
 import com.letv.sarrsdesktop.blockcanaryex.jrt.MethodInfo;
 
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Looper;
@@ -201,15 +200,7 @@ public class BlockMonitor {
         if (sConnectServiceFuture == null) {
             synchronized (SERVICE_FUTURE_LOCK) {
                 if (sConnectServiceFuture == null) {
-                    sConnectServiceFuture = new ConnectServiceFuture() {
-                        @Override
-                        public synchronized void onServiceDisconnected(ComponentName name) {
-                            super.onServiceDisconnected(name);
-                            synchronized (SERVICE_FUTURE_LOCK) {
-                                sConnectServiceFuture = null;
-                            }
-                        }
-                    };
+                    sConnectServiceFuture = new ConnectServiceFuture();
                 }
             }
             Config config = BlockCanaryEx.getConfig();

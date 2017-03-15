@@ -62,6 +62,7 @@ class ConnectServiceFuture implements Future<ISamplerService>, ServiceConnection
     @Override
     public synchronized void onServiceDisconnected(ComponentName name) {
         mResultReceived = true;
+        mResult = null;
         if (enterWaitting) {
             notifyAll();
         }
