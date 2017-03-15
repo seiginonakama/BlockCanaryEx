@@ -1,4 +1,4 @@
-[English doc](https://github.com/lqcandqq13/BlockCanaryEx/blob/master/README.md)<br/>
+[English doc](https://github.com/lqcandqq13/BlockCanaryEx/blob/master/README_EN.md)<br/>
 
 BlockCanaryEx
 =============
