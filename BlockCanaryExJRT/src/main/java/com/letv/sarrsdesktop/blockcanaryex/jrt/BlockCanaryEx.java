@@ -17,6 +17,7 @@ package com.letv.sarrsdesktop.blockcanaryex.jrt;
 
 import com.letv.sarrsdesktop.blockcanaryex.jrt.internal.BlockMonitor;
 import com.letv.sarrsdesktop.blockcanaryex.jrt.internal.LogWriter;
+import com.letv.sarrsdesktop.blockcanaryex.jrt.internal.ProcessUtils;
 import com.letv.sarrsdesktop.blockcanaryex.jrt.internal.WriteLogHandler;
 import com.letv.sarrsdesktop.blockcanaryex.jrt.ui.DisplayActivity;
 import com.letv.sarrsdesktop.blockcanaryex.jrt.ui.DisplayService;
@@ -39,6 +40,7 @@ public class BlockCanaryEx {
     private static final String TAG = "BlockCanaryEx";
     private static Config sConfig;
     private static final DisplayService DISPLAY_SERVICE = new DisplayService();
+    private static final String BLOCK_SAMPLER_SERVICE_NAME = "blockcanaryex";
 
     /**
      * begin block monitor
@@ -53,7 +55,7 @@ public class BlockCanaryEx {
             throw new IllegalStateException("BlockCanaryEx installed");
         }
         sConfig = config;
-        BlockMonitor.ensureMonitorInstalled();
+        BlockMonitor.install(config);
         BlockMonitor.registerBlockObserver(sConfig);
         LogWriter.cleanObsolete();
         BlockMonitor.registerBlockObserver(DISPLAY_SERVICE);
@@ -77,6 +79,17 @@ public class BlockCanaryEx {
      */
     public static Config getConfig() {
         return sConfig;
+    }
+
+    /**
+     * whether current process is sampler process,
+     * app should not do anything in sampler process
+     *
+     * @return true if it is, else false
+     */
+    public static boolean isInSamplerProcess(Context context) {
+        String processName = ProcessUtils.myProcessName(context);
+        return processName != null && processName.endsWith(":" + BLOCK_SAMPLER_SERVICE_NAME);
     }
 
     private static void setEnabled(final Context context, final Class<?> componentClass, final boolean enabled) {

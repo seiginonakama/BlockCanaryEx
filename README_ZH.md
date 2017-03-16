@@ -9,7 +9,7 @@ BlockCanaryEx
 
 BlockCanaryEx和BlockCanary的区别如下
 -------------
-- BlockCanaryEx的运行时代码复制或修改自BlockCanary，ui和大部分功能基本一致;
+- BlockCanaryEx的运行时代码修改自BlockCanary，ui和大部分功能基本一致;
 - BlockCanaryEx添加了方法采样，知道主线程中所有方法的执行时间和执行次数;
 - 当应用卡顿时，BlockCanaryEx更关注app代码中，哪些方法耗时最多，重点记录和显示这些耗时方法。
 
@@ -33,7 +33,9 @@ apply plugin: 'blockcanaryex'
 ```
 
 ```groovy
-compile 'com.letv.sarrsdesktop:BlockCanaryExJRT:0.9.3.4'
+debugCompile 'com.letv.sarrsdesktop:BlockCanaryExJRT:0.9.4'
+releaseCompile 'com.letv.sarrsdesktop:BlockCanaryExJRTNoOp:0.9.4'
+testCompile 'com.letv.sarrsdesktop:BlockCanaryExJRTNoOp:0.9.4'
 ```
 
 基础使用
@@ -46,9 +48,7 @@ public class TestApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        if(BuildConfig.DEBUG) {
-            //we don't suggest use BlockCanaryEx on release version
-            //TODO add no-op version BlockCanaryEx
+        if(!BlockCanaryEx.isInSamplerProcess(this)) {
             BlockCanaryEx.install(new Config(this));
         }
     }

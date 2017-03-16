@@ -15,35 +15,25 @@
  */
 package com.letv.sarrsdesktop.blockcanaryex.jrt;
 
+import android.content.Context;
+
 /**
- * add method sampler, base on BlockCanary
- * <p>
- * author: zhoulei date: 2017/2/28.
+ * A no-op version of {@link BlockCanaryEx} that can be used in release builds.
  */
 public class BlockCanaryEx {
-    /**
-     * begin block monitor
-     *
-     * @param config {@link Config}
-     */
+
     public static void install(Config config) {
     }
 
-    /**
-     * whether block hunter is installed
-     *
-     * @return true if installed, else false
-     */
     public static boolean isInstalled() {
         return false;
     }
 
-    /**
-     * return the config we get whe {@link #install(Config)}
-     *
-     * @return config
-     */
     public static Config getConfig() {
         return null;
+    }
+
+    public static boolean isInSamplerProcess(Context context) {
+        return false;
     }
 }

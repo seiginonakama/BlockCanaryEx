@@ -11,4 +11,5 @@
     <style name="block_canary_BlockCanary.Base" parent="android:Theme">
     </style>
     <integer name="block_canary_max_store_block_count">30</integer>
+    <integer name="block_canary_max_method_info_buffer">1024</integer>
 </resources>

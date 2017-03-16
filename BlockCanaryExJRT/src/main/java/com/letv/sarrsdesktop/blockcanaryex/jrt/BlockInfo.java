@@ -176,7 +176,7 @@ public class BlockInfo implements Serializable {
     private static String generateEnvInfo(String cpuRateInfo, boolean isCpuBusy) {
         Config config = BlockCanaryEx.getConfig();
 
-        return KEY_PROCESS_NAME + KV + ProcessUtils.myProcessName() + SEPARATOR +
+        return KEY_PROCESS_NAME + KV + ProcessUtils.myProcessName(config.getContext()) + SEPARATOR +
                 KEY_QUALIFIER + KV + config.provideQualifier() + SEPARATOR +
                 KEY_CPU_CORE_NUMBER + KV + PerformanceUtils.getNumCores() + SEPARATOR +
                 KEY_CPU_BUSY + KV + isCpuBusy + SEPARATOR +

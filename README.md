@@ -33,7 +33,9 @@ apply plugin: 'blockcanaryex'
 ```
 
 ```groovy
-compile 'com.letv.sarrsdesktop:BlockCanaryExJRT:0.9.3.4'
+debugCompile 'com.letv.sarrsdesktop:BlockCanaryExJRT:0.9.4'
+releaseCompile 'com.letv.sarrsdesktop:BlockCanaryExJRTNoOp:0.9.4'
+testCompile 'com.letv.sarrsdesktop:BlockCanaryExJRTNoOp:0.9.4'
 ```
 
 Basic Usage
@@ -46,9 +48,7 @@ public class TestApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        if(BuildConfig.DEBUG) {
-            //we don't suggest use BlockCanaryEx on release version
-            //TODO add no-op version BlockCanaryEx
+        if(!BlockCanaryEx.isInSamplerProcess(this)) {
             BlockCanaryEx.install(new Config(this));
         }
     }

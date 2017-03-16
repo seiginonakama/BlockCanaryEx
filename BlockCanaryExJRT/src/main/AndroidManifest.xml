@@ -19,7 +19,7 @@
 
         <service
             android:name=".internal.BlockSamplerService"
-            android:process=":blockcanary"/>
+            android:process=":blockcanaryex"/>
 
     </application>
 

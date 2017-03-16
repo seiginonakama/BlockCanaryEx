@@ -36,6 +36,8 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile project(':BlockCanaryExJRT')
+    debugCompile 'com.letv.sarrsdesktop:BlockCanaryExJRT:0.9.4'
+    releaseCompile 'com.letv.sarrsdesktop:BlockCanaryExJRTNoOp:0.9.4'
+    testCompile 'com.letv.sarrsdesktop:BlockCanaryExJRTNoOp:0.9.4'
     compile 'com.android.support:appcompat-v7:25.1.0'
 }

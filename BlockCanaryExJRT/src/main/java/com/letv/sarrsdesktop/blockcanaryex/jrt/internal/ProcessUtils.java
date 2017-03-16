@@ -15,8 +15,6 @@
  */
 package com.letv.sarrsdesktop.blockcanaryex.jrt.internal;
 
-import com.letv.sarrsdesktop.blockcanaryex.jrt.BlockCanaryEx;
-
 import android.annotation.TargetApi;
 import android.app.ActivityManager;
 import android.content.Context;
@@ -36,7 +34,7 @@ public class ProcessUtils {
         throw new InstantiationError("Must not instantiate this class");
     }
 
-    public static String myProcessName() {
+    public static String myProcessName(Context context) {
         if (sProcessName != null) {
             return sProcessName;
         }
@@ -44,7 +42,7 @@ public class ProcessUtils {
             if (sProcessName != null) {
                 return sProcessName;
             }
-            sProcessName = obtainProcessName(BlockCanaryEx.getConfig().getContext());
+            sProcessName = obtainProcessName(context);
             return sProcessName;
         }
     }

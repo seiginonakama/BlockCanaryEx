@@ -27,6 +27,7 @@ class LooperMonitor implements Printer {
     private BlockListener mBlockListener = null;
     private boolean mPrintingStarted = false;
 
+    //running on SamplerReportThread
     interface BlockListener {
         void onStart();
 
