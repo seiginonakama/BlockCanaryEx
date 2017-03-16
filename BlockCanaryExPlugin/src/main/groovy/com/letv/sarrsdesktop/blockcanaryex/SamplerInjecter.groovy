@@ -15,14 +15,15 @@
  */
 package com.letv.sarrsdesktop.blockcanaryex
 
-import com.letv.sarrsdesktop.blockcanaryex.DirClassPath
-import com.letv.sarrsdesktop.blockcanaryex.JarClassPath
 import javassist.*
 
 import java.util.jar.JarEntry
 import java.util.jar.JarFile
 import java.util.jar.JarOutputStream
 import java.util.zip.ZipEntry
+
+import org.apache.commons.io.IOUtils
+import org.apache.commons.io.FileUtils;
 
 class SamplerInjecter {
     private static ClassPool classPool;
@@ -147,19 +148,17 @@ class SamplerInjecter {
     }
 
     static byte[] processClass(File file) {
-        def optClass = new File(file.getParent(), file.name + ".opt")
+        File optClass = new File(file.getParent(), file.name + ".opt")
 
         FileInputStream inputStream = new FileInputStream(file);
         FileOutputStream outputStream = new FileOutputStream(optClass)
 
         def bytes = injectSampler(inputStream);
         outputStream.write(bytes)
-        if (file.exists()) {
-            file.delete()
-        }
-        optClass.renameTo(file)
-        inputStream.close()
-        outputStream.close()
+        IOUtils.closeQuietly(inputStream)
+        IOUtils.closeQuietly(outputStream)
+        FileUtils.forceDelete(file)
+        FileUtils.moveFile(optClass, file)
         if (optClass.exists()) {
             optClass.delete()
         }
@@ -193,3 +192,4 @@ class SamplerInjecter {
         }
     }
 }
+
