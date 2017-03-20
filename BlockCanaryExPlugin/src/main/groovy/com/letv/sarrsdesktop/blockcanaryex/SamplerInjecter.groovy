@@ -169,7 +169,7 @@ class SamplerInjecter {
         if (!entryName.endsWith(".class")) {
             return false;
         }
-        if (entryName.contains("/R\$") || entryName.endsWith("/R.class") || entryName.endsWith("/BuildConfig.class") || entryName.startsWith("cn/jiajixin/nuwa/") || entryName.contains("android/support/"))
+        if (entryName.contains("/R\$") || entryName.endsWith("/R.class") || entryName.endsWith("/BuildConfig.class"))
             return false;
         return IncludeUtils.isIncluded(entryName, includePackage) && !IncludeUtils.isExcluded(entryName, excludePackage, excludeClass)
     }
