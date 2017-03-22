@@ -2,7 +2,7 @@
 
 BlockCanaryEx
 =============
-a library for android which can help you to find the most heavy method in your code when your app blocked,
+a library for android which can help you to find heavy methods in your code when your app blocked,
 base on [BlockCanary](https://github.com/markzhai/AndroidPerformanceMonitor).
 
 ![TextLayoutBuilder logo](./sample.jpg)
