@@ -5,7 +5,7 @@ BlockCanaryEx
 a library for android which can help you to find the most heavy method in your code when your app blocked,
 base on [BlockCanary](https://github.com/markzhai/AndroidPerformanceMonitor).
 
-![TextLayoutBuilder logo](./sample.png)
+![TextLayoutBuilder logo](./sample.jpeg)
 
 What's the difference between BlockCanaryEx and BlockCanary
 -------------
@@ -23,7 +23,7 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:1.5.0' //version must >= 1.5.0
-        classpath 'com.letv.sarrsdesktop:BlockCanaryExPlugin:0.9.4'
+        classpath 'com.letv.sarrsdesktop:BlockCanaryExPlugin:0.9.5'
     }
 }
 ```
@@ -33,9 +33,9 @@ apply plugin: 'blockcanaryex'
 ```
 
 ```groovy
-debugCompile 'com.letv.sarrsdesktop:BlockCanaryExJRT:0.9.4'
-releaseCompile 'com.letv.sarrsdesktop:BlockCanaryExJRTNoOp:0.9.4'
-testCompile 'com.letv.sarrsdesktop:BlockCanaryExJRTNoOp:0.9.4'
+    debugCompile 'com.letv.sarrsdesktop:BlockCanaryExJRT:0.9.5'
+    releaseCompile 'com.letv.sarrsdesktop:BlockCanaryExJRTNoOp:0.9.5'
+    testCompile 'com.letv.sarrsdesktop:BlockCanaryExJRTNoOp:0.9.5'
 ```
 
 Basic Usage

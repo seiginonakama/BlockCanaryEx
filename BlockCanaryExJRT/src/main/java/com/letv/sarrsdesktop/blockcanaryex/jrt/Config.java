@@ -91,7 +91,7 @@ public class Config implements BlockMonitor.BlockObserver {
      * @return true if it is heavy method, else false
      */
     public boolean isHeavyMethod(MethodInfo methodInfo) {
-        return methodInfo.getCostThreadTime() > 0L;
+        return methodInfo.getCostThreadTime() > 0L && methodInfo.getCostRealTimeMs() > 0L;
     }
 
     /**

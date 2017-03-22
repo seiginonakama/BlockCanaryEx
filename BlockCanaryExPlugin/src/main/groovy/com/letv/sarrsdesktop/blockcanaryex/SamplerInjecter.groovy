@@ -16,14 +16,13 @@
 package com.letv.sarrsdesktop.blockcanaryex
 
 import javassist.*
+import org.apache.commons.io.FileUtils
+import org.apache.commons.io.IOUtils
 
 import java.util.jar.JarEntry
 import java.util.jar.JarFile
 import java.util.jar.JarOutputStream
 import java.util.zip.ZipEntry
-
-import org.apache.commons.io.IOUtils
-import org.apache.commons.io.FileUtils;
 
 class SamplerInjecter {
     private static ClassPool classPool;
@@ -130,9 +129,35 @@ class SamplerInjecter {
         ctBehavior.insertAfter(
                 """
                    if(__bl_icl) {
-                       com.letv.sarrsdesktop.blockcanaryex.jrt.internal.MethodSampler.onMethodExit(__bl_stn, __bl_stt, "${clazz.name}", "${ctBehavior.name}", "${generateParamTypes(ctBehavior.parameterTypes)}");
+                       com.letv.sarrsdesktop.blockcanaryex.jrt.internal.MethodSampler.onMethodExit(__bl_stn, __bl_stt, "${generateClassName(clazz)}", "${ctBehavior.name}", "${generateParamTypes(ctBehavior.parameterTypes)}");
                    }
                 """)
+    }
+
+    static String generateClassName(CtClass clazz) {
+        String clazzName = clazz.getName()
+        int index$ = clazzName.lastIndexOf("\$")
+        if(index$ < 0) {
+            return clazzName
+        } else {
+            String suffix = clazzName.subSequence(index$ + 1, clazzName.length())
+            if(Character.isDigit(suffix.charAt(0))) {
+                String parentSimpleName;
+                if(clazz.getSuperclass().name == "java.lang.Object") {
+                    CtClass[] ctClasses = clazz.getInterfaces();
+                    if(ctClasses != null && ctClasses.length > 0) {
+                        parentSimpleName = ctClasses[0].simpleName;
+                    } else {
+                        parentSimpleName = Object.class.simpleName;
+                    }
+                } else {
+                    parentSimpleName = clazz.getSuperclass().simpleName;
+                }
+                return clazzName + "\$" + parentSimpleName;
+            } else {
+                return clazzName;
+            }
+        }
     }
 
     static String generateParamTypes(CtClass[] paramTypes) {

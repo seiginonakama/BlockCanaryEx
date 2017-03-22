@@ -27,6 +27,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -76,6 +77,10 @@ public class BlockInfo implements Serializable {
     private static final String KV = " = ";
     private static final String MS = "ms";
     private static final String KB = "KB";
+
+    private static final DecimalFormat LITTLE_DECIMAL_FORMAT = new DecimalFormat("0.00");
+    private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("00");
+
     private static final Comparator<MethodInfo> COMPARATOR = new Comparator<MethodInfo>() {
         @Override
         public int compare(MethodInfo l, MethodInfo r) {
@@ -120,9 +125,9 @@ public class BlockInfo implements Serializable {
         blockInfo.endTime = TimeUtils.format(blockInfo.timestamp);
         blockInfo.blockThreadTime = blockThreadTime + MS;
         blockInfo.envInfo = generateEnvInfo(cpuRateInfo, isCpuBusy);
-        blockInfo.topHeavyMethod = generateTopHeavyMethod(methodInfoList);
-        blockInfo.heavyMethods = generateHeavyMethod(methodInfoList);
-        blockInfo.calculateFrequentMethods(methodInfoList);
+        blockInfo.topHeavyMethod = generateTopHeavyMethod(blockRealTime, methodInfoList);
+        blockInfo.heavyMethods = generateHeavyMethod(blockRealTime, methodInfoList);
+        blockInfo.calculateFrequentMethods(blockRealTime, methodInfoList);
         return blockInfo;
     }
 
@@ -189,20 +194,23 @@ public class BlockInfo implements Serializable {
                 KEY_UID + KV + config.provideUid() + SEPARATOR;
     }
 
-    private static String generateHeavyMethod(List<MethodInfo> methodInfoList) {
+    private static String generateHeavyMethod(long blockRealTime, List<MethodInfo> methodInfoList) {
         StringBuilder heavyMethodBuilder = new StringBuilder();
         List<MethodInfo> tmp = new ArrayList<>(methodInfoList.size());
         tmp.addAll(methodInfoList);
         Collections.sort(tmp, COMPARATOR);
         for (MethodInfo methodInfo : tmp) {
             if (BlockCanaryEx.getConfig().isHeavyMethod(methodInfo)) {
-                heavyMethodBuilder.append(methodInfo.toString()).append(SEPARATOR).append(SEPARATOR);
+                heavyMethodBuilder.append(generatePercent(blockRealTime, methodInfo.getCostRealTimeMs()))
+                        .append(methodInfo.toString())
+                        .append(SEPARATOR)
+                        .append(SEPARATOR);
             }
         }
         return heavyMethodBuilder.toString();
     }
 
-    private static String generateTopHeavyMethod(List<MethodInfo> methodInfoList) {
+    private static String generateTopHeavyMethod(long blockRealTime, List<MethodInfo> methodInfoList) {
         if (methodInfoList.size() == 0) {
             return "none method be sampled";
         } else {
@@ -212,11 +220,12 @@ public class BlockInfo implements Serializable {
                     mostHeavyMethod = methodInfo;
                 }
             }
-            return mostHeavyMethod.getClassSimpleName() + "." + mostHeavyMethod.getMethodName() + "()" + " cost " + mostHeavyMethod.getCostRealTimeMs() + "ms";
+            return generatePercent(blockRealTime, mostHeavyMethod.getCostRealTimeMs())
+                    + mostHeavyMethod.getClassSimpleName() + "." + mostHeavyMethod.getMethodName() + "()" + " cost " + mostHeavyMethod.getCostRealTimeMs() + "ms";
         }
     }
 
-    private void calculateFrequentMethods(List<MethodInfo> methodInfoList) {
+    private void calculateFrequentMethods(long blockRealTime, List<MethodInfo> methodInfoList) {
         if (methodInfoList == null || methodInfoList.size() == 0) {
             topFrequentMethod = "";
             frequentMethods = "";
@@ -256,10 +265,15 @@ public class BlockInfo implements Serializable {
         for (int i = 0; i < frequentMethodInfos.size(); i++) {
             FrequentMethodInfo frequentMethodInfo = frequentMethodInfos.get(i);
             if(i == 0) {
-                topFrequentMethod = frequentMethodInfo.toString();
-                frequentMethodBuilder.append(topFrequentMethod).append(SEPARATOR).append(SEPARATOR);
+                topFrequentMethod = generatePercent(blockRealTime, frequentMethodInfo.getTotalCostRealTimeMs()) +
+                        frequentMethodInfo.toString();
+                frequentMethodBuilder
+                        .append(topFrequentMethod)
+                        .append(SEPARATOR)
+                        .append(SEPARATOR);
             } else {
-                frequentMethodBuilder.append(frequentMethodInfo.toString()).append(SEPARATOR).append(SEPARATOR);
+                frequentMethodBuilder.append(generatePercent(blockRealTime, frequentMethodInfo.getTotalCostRealTimeMs()))
+                        .append(frequentMethodInfo.toString()).append(SEPARATOR).append(SEPARATOR);
             }
         }
         if(topFrequentMethod == null) {
@@ -398,6 +412,15 @@ public class BlockInfo implements Serializable {
 
         if(closeException != null) {
             throw new SerializeException("BlockInfo file io close deserialize failed", closeException);
+        }
+    }
+
+    private static String generatePercent(long totalBlockedTime, long methodBlockedTime) {
+        if(totalBlockedTime == 0) {
+            return "[100%]";
+        } else {
+            float percent = (float)100 * methodBlockedTime / totalBlockedTime;
+            return "[" + (percent < 1 ? LITTLE_DECIMAL_FORMAT.format(percent) : DECIMAL_FORMAT.format(percent)) + "%]";
         }
     }
 }
