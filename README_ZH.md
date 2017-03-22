@@ -5,7 +5,7 @@ BlockCanaryEx
 记录主线程中执行的所有方法和它们的执行时间，当app卡顿时，将所有耗时方法直接展示给开发者，大量节省开发者定位卡顿问题的时间。
 此项目基于 [BlockCanary](https://github.com/markzhai/AndroidPerformanceMonitor)。
 
-![TextLayoutBuilder logo](./sample.jpeg)
+![TextLayoutBuilder logo](./sample.jpg)
 
 BlockCanaryEx和BlockCanary的区别如下
 -------------
