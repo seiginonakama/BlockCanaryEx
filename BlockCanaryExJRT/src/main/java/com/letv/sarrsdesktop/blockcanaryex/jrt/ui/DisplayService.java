@@ -50,8 +50,8 @@ public final class DisplayService implements BlockMonitor.BlockObserver {
             intent.putExtra("show_latest", blockInfo.getStartTime());
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             PendingIntent pendingIntent = PendingIntent.getActivity(context, 1, intent, FLAG_UPDATE_CURRENT);
-            String contentTitle = context.getString(R.string.block_canary_class_has_blocked, blockInfo.getBlockRealTime());
-            String contentText = context.getString(R.string.block_canary_notification_message);
+            String contentTitle = context.getString(R.string.block_canary_ex_class_has_blocked, blockInfo.getBlockRealTime());
+            String contentText = context.getString(R.string.block_canary_ex_notification_message);
             show(context, contentTitle, contentText, pendingIntent);
         }
     }
@@ -64,7 +64,7 @@ public final class DisplayService implements BlockMonitor.BlockObserver {
         Notification notification;
         if (SDK_INT < HONEYCOMB) {
             notification = new Notification();
-            notification.icon = R.drawable.block_canary_notification;
+            notification.icon = R.drawable.block_canary_ex_notification;
             notification.when = System.currentTimeMillis();
             notification.flags |= Notification.FLAG_AUTO_CANCEL;
             notification.defaults = Notification.DEFAULT_SOUND;
@@ -77,7 +77,7 @@ public final class DisplayService implements BlockMonitor.BlockObserver {
             }
         } else {
             Notification.Builder builder = new Notification.Builder(context)
-                    .setSmallIcon(R.drawable.block_canary_notification)
+                    .setSmallIcon(R.drawable.block_canary_ex_notification)
                     .setWhen(System.currentTimeMillis())
                     .setContentTitle(contentTitle)
                     .setContentText(contentText)

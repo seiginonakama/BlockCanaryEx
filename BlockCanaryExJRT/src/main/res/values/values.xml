@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="block_canary_block_list_title">Blocks in %s</string>
-    <string name="block_canary_class_has_blocked">total blocked %s</string>
-    <string name="block_canary_delete">Delete</string>
-    <string name="block_canary_delete_all">Delete all</string>
-    <string name="block_canary_display_activity_label">BlockCanaryEx</string>
-    <string name="block_canary_notification_message">Click for more details</string>
-    <string name="block_canary_share_stack_dump">Share log</string>
-    <string name="block_canary_share_with">Share with…</string>
-    <style name="block_canary_BlockCanary.Base" parent="android:Theme">
+    <string name="block_canary_ex_block_list_title">Blocks in %s</string>
+    <string name="block_canary_ex_class_has_blocked">total blocked %s</string>
+    <string name="block_canary_ex_delete">Delete</string>
+    <string name="block_canary_ex_delete_all">Delete all</string>
+    <string name="block_canary_ex_display_activity_label">BlockCanaryEx</string>
+    <string name="block_canary_ex_notification_message">Click for more details</string>
+    <string name="block_canary_ex_share_stack_dump">Share log</string>
+    <string name="block_canary_ex_share_with">Share with…</string>
+    <style name="block_canary_ex_BlockCanary.Base" parent="android:Theme">
     </style>
-    <integer name="block_canary_max_store_block_count">30</integer>
-    <integer name="block_canary_max_method_info_buffer">1024</integer>
+    <integer name="block_canary_ex_max_store_block_count">30</integer>
+    <integer name="block_canary_ex_max_method_info_buffer">1024</integer>
 </resources>

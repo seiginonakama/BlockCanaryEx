@@ -134,7 +134,7 @@ public class BlockMonitor {
 
     public static void install(Config config) {
         Context context = config.getContext();
-        MethodInfoPool.setMaxBuffer(context.getResources().getInteger(R.integer.block_canary_max_method_info_buffer));
+        MethodInfoPool.setMaxBuffer(context.getResources().getInteger(R.integer.block_canary_ex_max_method_info_buffer));
         ensureMonitorInstalled();
         connectServiceIfNot();
     }

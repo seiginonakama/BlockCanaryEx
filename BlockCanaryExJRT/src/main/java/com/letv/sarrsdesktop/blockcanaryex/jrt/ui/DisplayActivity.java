@@ -96,7 +96,7 @@ public class DisplayActivity extends Activity implements LogWriter.LogListener {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        sMaxStoreBlockCount = getResources().getInteger(R.integer.block_canary_max_store_block_count);
+        sMaxStoreBlockCount = getResources().getInteger(R.integer.block_canary_ex_max_store_block_count);
 
         if (savedInstanceState != null) {
             mBlockStartTime = savedInstanceState.getString(SHOW_BLOCK_EXTRA_KEY);
@@ -107,7 +107,7 @@ public class DisplayActivity extends Activity implements LogWriter.LogListener {
             }
         }
 
-        setContentView(R.layout.block_canary_display_leak);
+        setContentView(R.layout.block_canary_ex_display_leak);
 
         mListView = (ListView) findViewById(R.id.__leak_canary_display_leak_list);
         mFailureView = (TextView) findViewById(R.id.__leak_canary_display_leak_failure);
@@ -141,7 +141,7 @@ public class DisplayActivity extends Activity implements LogWriter.LogListener {
         // We don't want this to be called with an incompatible theme.
         // This could happen if you implement runtime switching of themes
         // using ActivityLifecycleCallbacks.
-        if (resid != R.style.block_canary_BlockCanary_Base) {
+        if (resid != R.style.block_canary_ex_BlockCanary_Base) {
             return;
         }
         super.setTheme(resid);
@@ -157,7 +157,7 @@ public class DisplayActivity extends Activity implements LogWriter.LogListener {
     public boolean onCreateOptionsMenu(Menu menu) {
         final BlockInfoEx blockInfo = getBlock(mBlockStartTime);
         if (blockInfo != null) {
-            menu.add(R.string.block_canary_share_stack_dump)
+            menu.add(R.string.block_canary_ex_share_stack_dump)
                     .setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
                         @Override
                         public boolean onMenuItemClick(MenuItem item) {
@@ -198,7 +198,7 @@ public class DisplayActivity extends Activity implements LogWriter.LogListener {
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setType("application/octet-stream");
         intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(heapDumpFile));
-        startActivity(Intent.createChooser(intent, getString(R.string.block_canary_share_with)));
+        startActivity(Intent.createChooser(intent, getString(R.string.block_canary_ex_share_with)));
     }
 
     private void updateUi() {
@@ -239,8 +239,8 @@ public class DisplayActivity extends Activity implements LogWriter.LogListener {
                     actionBar.setDisplayHomeAsUpEnabled(false);
                 }
             }
-            setTitle(getString(R.string.block_canary_block_list_title, getPackageName()));
-            mActionButton.setText(R.string.block_canary_delete_all);
+            setTitle(getString(R.string.block_canary_ex_block_list_title, getPackageName()));
+            mActionButton.setText(R.string.block_canary_ex_delete_all);
             mActionButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -275,7 +275,7 @@ public class DisplayActivity extends Activity implements LogWriter.LogListener {
                 }
             }
             mActionButton.setVisibility(VISIBLE);
-            mActionButton.setText(R.string.block_canary_delete);
+            mActionButton.setText(R.string.block_canary_ex_delete);
             mActionButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -289,7 +289,7 @@ public class DisplayActivity extends Activity implements LogWriter.LogListener {
             });
         }
         adapter.update(blockInfo);
-        setTitle(getString(R.string.block_canary_class_has_blocked, blockInfo.getBlockRealTime()));
+        setTitle(getString(R.string.block_canary_ex_class_has_blocked, blockInfo.getBlockRealTime()));
     }
 
     private BlockInfoEx getBlock(String startTime) {
@@ -322,7 +322,7 @@ public class DisplayActivity extends Activity implements LogWriter.LogListener {
         public View getView(int position, View convertView, ViewGroup parent) {
             if (convertView == null) {
                 convertView = LayoutInflater.from(DisplayActivity.this)
-                        .inflate(R.layout.block_canary_block_row, parent, false);
+                        .inflate(R.layout.block_canary_ex_block_row, parent, false);
             }
             TextView titleView = (TextView) convertView.findViewById(R.id.__leak_canary_row_text);
             TextView timeView = (TextView) convertView.findViewById(R.id.__leak_canary_row_time);
@@ -337,7 +337,7 @@ public class DisplayActivity extends Activity implements LogWriter.LogListener {
 
             String mostHeavy = blockInfo.getTopHeavyMethod();
             String title = index + mostHeavy + ", " +
-                    getString(R.string.block_canary_class_has_blocked, blockInfo.getBlockRealTime());
+                    getString(R.string.block_canary_ex_class_has_blocked, blockInfo.getBlockRealTime());
             titleView.setText(title);
             timeView.setText(blockInfo.getEndTime());
             return convertView;
