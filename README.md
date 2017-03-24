@@ -23,7 +23,7 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:1.5.0' //version must >= 1.5.0
-        classpath 'com.letv.sarrsdesktop:BlockCanaryExPlugin:0.9.5.1'
+        classpath 'com.letv.sarrsdesktop:BlockCanaryExPlugin:0.9.5.2'
     }
 }
 ```
@@ -33,24 +33,24 @@ apply plugin: 'blockcanaryex'
 ```
 
 ```groovy
-debugCompile 'com.letv.sarrsdesktop:BlockCanaryExJRT:0.9.5.1'
-releaseCompile 'com.letv.sarrsdesktop:BlockCanaryExJRTNoOp:0.9.5.1'
-testCompile 'com.letv.sarrsdesktop:BlockCanaryExJRTNoOp:0.9.5.1'
+debugCompile 'com.letv.sarrsdesktop:BlockCanaryExJRT:0.9.5.2'
+releaseCompile 'com.letv.sarrsdesktop:BlockCanaryExJRTNoOp:0.9.5.2'
+testCompile 'com.letv.sarrsdesktop:BlockCanaryExJRTNoOp:0.9.5.2'
 ```
 
 Basic Usage
 -------------
 
-init BlockCanaryEx when your application created
+init BlockCanaryEx before other method when your application created
 
 ```java
 public class TestApplication extends Application {
     @Override
     public void onCreate() {
-        super.onCreate();
         if(!BlockCanaryEx.isInSamplerProcess(this)) {
             BlockCanaryEx.install(new Config(this));
         }
+        super.onCreate();
     }
 }
 ```
@@ -114,8 +114,6 @@ you also can override more Config method to customize BlockCanaryEx runtime
               /**
                * judge whether the loop is blocked, you can override this to decide
                * whether it is blocked by your logic
-               *
-               * Note: running in none ui thread
                *
                * @param startTime in mills
                * @param endTime in mills

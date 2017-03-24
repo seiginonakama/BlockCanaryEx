@@ -27,8 +27,26 @@ class LooperMonitor implements Printer {
     private BlockListener mBlockListener = null;
     private boolean mPrintingStarted = false;
 
+    private boolean mFirstStart = true;
+
+    private final Runnable mNotifyActionStart = new Runnable() {
+        @Override
+        public void run() {
+            notifyStart();
+        }
+    };
+
+    private final Runnable mNotifyActionNoBlock = new Runnable() {
+        @Override
+        public void run() {
+            notifyNoBlock();
+        }
+    };
+
     //running on SamplerReportThread
     interface BlockListener {
+        void beforeFirstStart(long firstStartTime, long firstStartThreadTime);
+
         void onStart();
 
         void onBlockEvent(long realStartTime,
@@ -56,16 +74,23 @@ class LooperMonitor implements Printer {
 
     @Override
     public void println(String x) {
+        if(mFirstStart) {
+            mFirstStart = false;
+            final long currentTime = System.currentTimeMillis();
+            final long currentThreadTime = SystemClock.currentThreadTimeMillis();
+            SamplerReportHandler.getInstance().post(new Runnable() {
+                @Override
+                public void run() {
+                    notifyBeforeFirstStart(currentTime, currentThreadTime);
+                }
+            });
+        }
+
         if(!mPrintingStarted) {
             mPrintingStarted = true;
             mStartTimestamp = System.currentTimeMillis();
             mStartThreadTimestamp = SystemClock.currentThreadTimeMillis();
-            SamplerReportHandler.getInstance().post(new Runnable() {
-                @Override
-                public void run() {
-                    notifyStart();
-                }
-            });
+            SamplerReportHandler.getInstance().post(mNotifyActionStart);
         } else {
             mPrintingStarted = false;
             final Config config = BlockCanaryEx.getConfig();
@@ -76,17 +101,21 @@ class LooperMonitor implements Printer {
             final long endTime = System.currentTimeMillis();
             final long startThreadTime = mStartThreadTimestamp;
             final long endThreadTime = SystemClock.currentThreadTimeMillis();
-            SamplerReportHandler.getInstance().post(new Runnable() {
-                @Override
-                public void run() {
-                    if (config.isBlock(startTime, endTime, startThreadTime, endThreadTime)) {
+            if(config.isBlock(startTime, endTime, startThreadTime, endThreadTime)) {
+                SamplerReportHandler.getInstance().post(new Runnable() {
+                    @Override
+                    public void run() {
                         notifyBlockEvent(startTime, endTime, startThreadTime, endThreadTime);
-                    } else {
-                        notifyNoBlock();
                     }
-                }
-            });
+                });
+            } else {
+                SamplerReportHandler.getInstance().post(mNotifyActionNoBlock);
+            }
         }
+    }
+
+    private void notifyBeforeFirstStart(long currentTime, long currentThreadTime) {
+        mBlockListener.beforeFirstStart(currentTime, currentThreadTime);
     }
 
     private void notifyStart() {

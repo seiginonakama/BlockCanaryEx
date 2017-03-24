@@ -70,8 +70,6 @@ public class Config implements BlockMonitor.BlockObserver {
      * judge whether the loop is blocked, you can override this to decide
      * whether it is blocked by your logic
      *
-     * Note: running in none ui thread
-     *
      * @param startTime in mills
      * @param endTime in mills
      * @param startThreadTime in mills

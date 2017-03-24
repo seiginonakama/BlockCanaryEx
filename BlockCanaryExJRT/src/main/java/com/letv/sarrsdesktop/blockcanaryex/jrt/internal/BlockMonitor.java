@@ -52,7 +52,17 @@ public class BlockMonitor {
 
     private static final int MY_PID = Process.myPid();
 
+    private static final long INSTALLED_TIME = System.currentTimeMillis();
+    private static final long INSTALLED_THREAD_TIME = SystemClock.currentThreadTimeMillis();
+
     private static final LooperMonitor.BlockListener BLOCK_LISTENER = new LooperMonitor.BlockListener() {
+        @Override
+        public void beforeFirstStart(long firstStartTime, long firstStartThreadTime) {
+            if (BlockCanaryEx.getConfig().isBlock(INSTALLED_TIME, firstStartTime, INSTALLED_THREAD_TIME, firstStartThreadTime)) {
+                onBlockEvent(INSTALLED_TIME, firstStartTime, INSTALLED_THREAD_TIME, firstStartThreadTime);
+            }
+        }
+
         @Override
         public void onStart() {
             long currentTime = SystemClock.uptimeMillis();
