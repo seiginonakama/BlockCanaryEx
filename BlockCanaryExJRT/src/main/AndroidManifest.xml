@@ -1,8 +1,7 @@
 <manifest package="com.letv.sarrsdesktop.blockcanaryex.jrt"
           xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <application android:allowBackup="true"
-                 android:supportsRtl="true">
+    <application>
         <activity
             android:name=".ui.DisplayActivity"
             android:enabled="false"
