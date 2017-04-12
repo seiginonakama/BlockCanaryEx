@@ -1,8 +1,6 @@
-<manifest package="com.letv.sarrsdesktop.blockcanaryex.jrt"
-          xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest package="com.letv.sarrsdesktop.blockcanaryex.jrt">
 
-    <application
-        android:supportsRtl="true">
+    <application>
 
     </application>
 

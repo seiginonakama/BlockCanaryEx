@@ -13,12 +13,15 @@ import java.util.Random;
 public class TestApplication extends Application {
     @Override
     public void onCreate() {
-        if(!BlockCanaryEx.isInSamplerProcess(this)) {
+        boolean isInSamplerProcess = BlockCanaryEx.isInSamplerProcess(this);
+        if(!isInSamplerProcess) {
             BlockCanaryEx.install(new Config(this));
         }
         super.onCreate();
 
-        doHeavyWork();
+        if(!isInSamplerProcess) {
+            doHeavyWork();
+        }
     }
 
     private void doHeavyWork() {

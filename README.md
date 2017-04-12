@@ -23,7 +23,7 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:1.5.0' //version must >= 1.5.0
-        classpath 'com.letv.sarrsdesktop:BlockCanaryExPlugin:0.9.5.2'
+        classpath 'com.letv.sarrsdesktop:BlockCanaryExPlugin:0.9.5.3'
     }
 }
 ```
@@ -33,9 +33,9 @@ apply plugin: 'blockcanaryex'
 ```
 
 ```groovy
-debugCompile 'com.letv.sarrsdesktop:BlockCanaryExJRT:0.9.5.2'
-releaseCompile 'com.letv.sarrsdesktop:BlockCanaryExJRTNoOp:0.9.5.2'
-testCompile 'com.letv.sarrsdesktop:BlockCanaryExJRTNoOp:0.9.5.2'
+debugCompile 'com.letv.sarrsdesktop:BlockCanaryExJRT:0.9.5.3'
+releaseCompile 'com.letv.sarrsdesktop:BlockCanaryExJRTNoOp:0.9.5.3'
+testCompile 'com.letv.sarrsdesktop:BlockCanaryExJRTNoOp:0.9.5.3'
 ```
 
 Basic Usage
@@ -47,10 +47,15 @@ init BlockCanaryEx before other method when your application created
 public class TestApplication extends Application {
     @Override
     public void onCreate() {
-        if(!BlockCanaryEx.isInSamplerProcess(this)) {
+        boolean isInSamplerProcess = BlockCanaryEx.isInSamplerProcess(this);
+        if(!isInSamplerProcess) {
             BlockCanaryEx.install(new Config(this));
         }
         super.onCreate();
+
+        if(!isInSamplerProcess) {
+            //your code start here
+        }
     }
 }
 ```
