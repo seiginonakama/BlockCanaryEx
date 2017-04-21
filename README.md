@@ -6,12 +6,14 @@ a library for android which can help you to find heavy methods in your code when
 base on [BlockCanary](https://github.com/markzhai/AndroidPerformanceMonitor).
 
 ![TextLayoutBuilder logo](./sample.jpg)
+![TextLayoutBuilder logo](./sample_gc.jpg)
 
 What's the difference between BlockCanaryEx and BlockCanary
 -------------
 - BlockCanaryEx java runtime code are modified form BlockCanary, ui and features are mostly same;
 - BlockCanaryEx add MethodSampler, knows every method's execute info (like cost-time, called-times...) when blocked;
-- BlockCanaryEx focus on the method which cost most of time when your app blocked, and display it directly to developer.
+- BlockCanaryEx focus on the method which cost most of time when your app blocked, and display it directly to developer;
+- add gc sampler，we can know whether and when gc happened when we blocked.
 
 Download
 -------------
@@ -23,7 +25,7 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:1.5.0' //version must >= 1.5.0
-        classpath 'com.letv.sarrsdesktop:BlockCanaryExPlugin:0.9.5.3'
+        classpath 'com.letv.sarrsdesktop:BlockCanaryExPlugin:0.9.6'
     }
 }
 ```
@@ -33,9 +35,9 @@ apply plugin: 'blockcanaryex'
 ```
 
 ```groovy
-debugCompile 'com.letv.sarrsdesktop:BlockCanaryExJRT:0.9.5.3'
-releaseCompile 'com.letv.sarrsdesktop:BlockCanaryExJRTNoOp:0.9.5.3'
-testCompile 'com.letv.sarrsdesktop:BlockCanaryExJRTNoOp:0.9.5.3'
+debugCompile 'com.letv.sarrsdesktop:BlockCanaryExJRT:0.9.6'
+releaseCompile 'com.letv.sarrsdesktop:BlockCanaryExJRTNoOp:0.9.6'
+testCompile 'com.letv.sarrsdesktop:BlockCanaryExJRTNoOp:0.9.6'
 ```
 
 Basic Usage

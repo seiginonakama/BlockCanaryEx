@@ -21,6 +21,7 @@ import com.letv.sarrsdesktop.blockcanaryex.jrt.R;
 
 import android.content.Context;
 import android.text.Html;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,10 +43,11 @@ final class DetailAdapter extends BaseAdapter {
 
     private static final int POSITION_TIME = 1;
     private static final int POSITION_ENV = 2;
-    private static final int POSITION_TOP_HEAVY_METHOD = 3;
-    private static final int POSITION_TOP_FREQUENT_METHOD = 4;
-    private static final int POSITION_HEAVY_METHOD = 5;
-    private static final int POSITION_FREQUENT_METHOD = 6;
+    private static final int POSITION_GC = 3;
+    private static final int POSITION_TOP_HEAVY_METHOD = 4;
+    private static final int POSITION_TOP_FREQUENT_METHOD = 5;
+    private static final int POSITION_HEAVY_METHOD = 6;
+    private static final int POSITION_FREQUENT_METHOD = 7;
 
     private static final String FOLDING_SUFFIX = "…";
 
@@ -105,6 +107,12 @@ final class DetailAdapter extends BaseAdapter {
                     htmlString = htmlString.substring(0, htmlString.indexOf(BlockInfo.KEY_TOTAL_MEMORY)) + FOLDING_SUFFIX;
                 }
                 htmlString = String.format("<font color='#ffff00'>%s</font> ", htmlString);
+                break;
+            case POSITION_GC:
+                if (folding && htmlString.length() > 600) {
+                    htmlString = htmlString.substring(0, 600) + FOLDING_SUFFIX;
+                }
+                htmlString = String.format("<font color='#ff95ca'>%s</font> ", htmlString);
                 break;
             case POSITION_TOP_HEAVY_METHOD:
                 htmlString = String.format("<font color='#4a86e8'>%s</font> ", htmlString);
@@ -167,11 +175,26 @@ final class DetailAdapter extends BaseAdapter {
             case POSITION_TOP_HEAVY_METHOD:
                 return contentBuilder.append("top-heavy-method :").append(SEPARATOR).append(SEPARATOR).append(mBlockInfo.getTopHeavyMethod()).toString();
             case POSITION_TOP_FREQUENT_METHOD:
+                if(TextUtils.isEmpty(mBlockInfo.getTopFrequentMethod())) {
+                    return "top-frequent-method : null";
+                }
                 return contentBuilder.append("top-frequent-method :").append(SEPARATOR).append(SEPARATOR).append(mBlockInfo.getTopFrequentMethod()).toString();
+            case POSITION_GC:
+                if(TextUtils.isEmpty(mBlockInfo.getGcEvent()))  {
+                    return "gc-event : null";
+                } else {
+                    return contentBuilder.append("gc-event :").append(SEPARATOR).append(SEPARATOR).append(mBlockInfo.getGcEvent()).toString();
+                }
             case POSITION_HEAVY_METHOD:
+                if(TextUtils.isEmpty(mBlockInfo.getHeavyMethods())) {
+                    return "heavy-methods : null";
+                }
                 return contentBuilder.append("heavy-methods :").append(SEPARATOR).append(SEPARATOR).append(mBlockInfo.getHeavyMethods()).toString();
             case POSITION_FREQUENT_METHOD:
             default:
+                if(TextUtils.isEmpty(mBlockInfo.getFrequentMethods())) {
+                    return "frequent-methods : null";
+                }
                 return contentBuilder.append("frequent-methods :").append(SEPARATOR).append(SEPARATOR).append(mBlockInfo.getFrequentMethods()).toString();
         }
     }

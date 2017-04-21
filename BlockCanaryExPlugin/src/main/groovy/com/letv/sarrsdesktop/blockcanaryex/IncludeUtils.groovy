@@ -32,7 +32,7 @@ class IncludeUtils {
         }
 
         for (String exclude : excludeClass) {
-            if (path.equals(exclude)) {
+            if (path.equals(exclude + ".class")) {
                 return true;
             }
         }

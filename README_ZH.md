@@ -11,7 +11,8 @@ BlockCanaryEx和BlockCanary的区别如下
 -------------
 - BlockCanaryEx的运行时代码修改自BlockCanary，ui和大部分功能基本一致;
 - BlockCanaryEx添加了方法采样，知道主线程中所有方法的执行时间和执行次数;
-- 当应用卡顿时，BlockCanaryEx更关注app代码中，哪些方法耗时最多，重点记录和显示这些耗时方法。
+- 当应用卡顿时，BlockCanaryEx更关注app代码中，哪些方法耗时最多，重点记录和显示这些耗时方法；
+- 添加了gc采样，当应用卡顿时，我们可以知道卡顿时是否发生了gc，以及gc的时间。
 
 安装
 -------------
@@ -23,7 +24,7 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:1.5.0' //version must >= 1.5.0
-        classpath 'com.letv.sarrsdesktop:BlockCanaryExPlugin:0.9.5.3'
+        classpath 'com.letv.sarrsdesktop:BlockCanaryExPlugin:0.9.6'
     }
 }
 ```
@@ -33,9 +34,9 @@ apply plugin: 'blockcanaryex'
 ```
 
 ```groovy
-debugCompile 'com.letv.sarrsdesktop:BlockCanaryExJRT:0.9.5.3'
-releaseCompile 'com.letv.sarrsdesktop:BlockCanaryExJRTNoOp:0.9.5.3'
-testCompile 'com.letv.sarrsdesktop:BlockCanaryExJRTNoOp:0.9.5.3'
+debugCompile 'com.letv.sarrsdesktop:BlockCanaryExJRT:0.9.6'
+releaseCompile 'com.letv.sarrsdesktop:BlockCanaryExJRTNoOp:0.9.6'
+testCompile 'com.letv.sarrsdesktop:BlockCanaryExJRTNoOp:0.9.6'
 ```
 
 基础使用

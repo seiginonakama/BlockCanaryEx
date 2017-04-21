@@ -20,6 +20,8 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.os.RemoteException;
 
+import java.util.List;
+
 /**
  * author: zhoulei date: 2017/3/15.
  */
@@ -28,8 +30,9 @@ public class BlockSamplerService extends Service {
 
     private ISamplerService.Stub mSamplerService = new ISamplerService.Stub() {
         @Override
-        public void resetCpuSampler(int pid) throws RemoteException {
+        public void resetSampler(int pid, long startTime) throws RemoteException {
             synchronized (CPU_SAMPLER_LOCK) {
+                GcSampler.startIfNot(pid);
                 CpuSampler.getInstance().resetSampler(pid);
             }
         }
@@ -43,6 +46,11 @@ public class BlockSamplerService extends Service {
                 cpuInfo.isBusy = CpuSampler.getInstance().isCpuBusy(startTime, endTime);
             }
             return cpuInfo;
+        }
+
+        @Override
+        public List<GcInfo> popGcInfoBetween(long startTime, long endTime) throws RemoteException {
+            return GcSampler.popGcInfoBetween(startTime, endTime);
         }
     };
 

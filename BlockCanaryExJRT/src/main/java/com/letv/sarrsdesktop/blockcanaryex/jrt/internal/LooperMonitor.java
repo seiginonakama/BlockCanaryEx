@@ -29,13 +29,6 @@ class LooperMonitor implements Printer {
 
     private boolean mFirstStart = true;
 
-    private final Runnable mNotifyActionStart = new Runnable() {
-        @Override
-        public void run() {
-            notifyStart();
-        }
-    };
-
     private final Runnable mNotifyActionNoBlock = new Runnable() {
         @Override
         public void run() {
@@ -47,7 +40,7 @@ class LooperMonitor implements Printer {
     interface BlockListener {
         void beforeFirstStart(long firstStartTime, long firstStartThreadTime);
 
-        void onStart();
+        void onStart(long startTime);
 
         void onBlockEvent(long realStartTime,
                           long realTimeEnd,
@@ -90,7 +83,13 @@ class LooperMonitor implements Printer {
             mPrintingStarted = true;
             mStartTimestamp = System.currentTimeMillis();
             mStartThreadTimestamp = SystemClock.currentThreadTimeMillis();
-            SamplerReportHandler.getInstance().post(mNotifyActionStart);
+            final long startTime = mStartThreadTimestamp;
+            SamplerReportHandler.getInstance().post(new Runnable() {
+                @Override
+                public void run() {
+                    notifyStart(startTime);
+                }
+            });
         } else {
             mPrintingStarted = false;
             final Config config = BlockCanaryEx.getConfig();
@@ -118,8 +117,8 @@ class LooperMonitor implements Printer {
         mBlockListener.beforeFirstStart(currentTime, currentThreadTime);
     }
 
-    private void notifyStart() {
-        mBlockListener.onStart();
+    private void notifyStart(long startTime) {
+        mBlockListener.onStart(startTime);
     }
 
     private void notifyBlockEvent(long startTime, long endTime, long startThreadTime, final long endThreadTime) {

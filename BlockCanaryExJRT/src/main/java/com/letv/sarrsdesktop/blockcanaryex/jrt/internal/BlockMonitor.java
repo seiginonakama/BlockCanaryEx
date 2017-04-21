@@ -48,7 +48,7 @@ public class BlockMonitor {
     private static ConnectServiceFuture sConnectServiceFuture;
 
     private static long mLastResetCpuSamplerTime = 0;
-    private static final long CPU_SAMPLER_INTERVAL = 1000L;
+    private static final long RESET_SAMPLER_INTERVAL = 1000L;
 
     private static final int MY_PID = Process.myPid();
 
@@ -64,13 +64,13 @@ public class BlockMonitor {
         }
 
         @Override
-        public void onStart() {
+        public void onStart(long startTime) {
             long currentTime = SystemClock.uptimeMillis();
-            if (currentTime - mLastResetCpuSamplerTime > CPU_SAMPLER_INTERVAL) {
+            if (currentTime - mLastResetCpuSamplerTime > RESET_SAMPLER_INTERVAL) {
                 ISamplerService samplerService = getServiceSyncMayNull();
                 if (samplerService != null) {
                     try {
-                        samplerService.resetCpuSampler(MY_PID);
+                        samplerService.resetSampler(MY_PID, startTime);
                         mLastResetCpuSamplerTime = currentTime;
                     } catch (RemoteException e) {
                         Log.d(TAG, "resetCpuSampler failed.", e);
@@ -86,19 +86,24 @@ public class BlockMonitor {
 
             String cpuRate = "";
             boolean isBusy = false;
+            List<GcInfo> gcInfos = null;
             ISamplerService samplerService = getServiceSyncMayNull();
             if (samplerService != null) {
                 try {
                     CpuInfo cpuInfo = samplerService.getCurrentCpuInfo(realStartTime, realTimeEnd);
                     cpuRate = cpuInfo.cpuRate;
                     isBusy = cpuInfo.isBusy;
+                    gcInfos = samplerService.popGcInfoBetween(realStartTime, realTimeEnd);
                 } catch (RemoteException e) {
-                    Log.d(TAG, "getCurrentCpuInfo() failed.", e);
+                    Log.d(TAG, "get CpuInfo or GcInfo failed.", e);
                 }
             }
-            final BlockInfo blockInfo = BlockInfo.newInstance(realStartTime, realTimeEnd - realStartTime, threadTimeEnd - threadTimeStart,
-                    methodInfoList, cpuRate, isBusy);
-            notifyBlocked(blockInfo);
+            long blockRealTime = realTimeEnd - realStartTime;
+            if(!isNotOurBusiness(methodInfoList, gcInfos, blockRealTime)) {
+                final BlockInfo blockInfo = BlockInfo.newInstance(realStartTime, blockRealTime, threadTimeEnd - threadTimeStart,
+                        methodInfoList, cpuRate, isBusy, gcInfos);
+                notifyBlocked(blockInfo);
+            }
         }
 
         @Override
@@ -109,6 +114,25 @@ public class BlockMonitor {
 
     private static final LooperMonitor LOOPER_MONITOR = new LooperMonitor(BLOCK_LISTENER);
     private static final List<WeakReference<BlockObserver>> sBlockObservers = new ArrayList<>();
+
+    //TODO why not our business, who block ui?
+    private static boolean isNotOurBusiness(List<MethodInfo> methodInfoList, List<GcInfo> gcInfos, long blockedRealTime) {
+        if(gcInfos != null && !gcInfos.isEmpty()) {
+            return false;
+        }
+        if(blockedRealTime == 0) {
+            return false;
+        }
+        long totalTime = 0;
+        for(MethodInfo methodInfo : methodInfoList) {
+            long costRealTime = methodInfo.getCostRealTimeMs();
+            if((float)(costRealTime) / blockedRealTime > 0.01) {
+                return false;
+            }
+            totalTime += costRealTime;
+        }
+        return ((float)totalTime) / blockedRealTime < 0.1;
+    }
 
     private static void notifyBlocked(BlockInfo blockInfo) {
         Iterator<WeakReference<BlockObserver>> iterator = sBlockObservers.iterator();

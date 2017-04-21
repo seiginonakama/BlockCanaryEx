@@ -47,7 +47,7 @@ public class BlockInfo implements Serializable {
     public static final String KEY_QUALIFIER = "qualifier";
     public static final String KEY_UID = "uid";
 
-    public static BlockInfo newInstance(long startTime, long blockRealTime, long blockThreadTime, List<MethodInfo> methodInfoList, String cpuRateInfo, boolean isCpuBusy) {
+    public static BlockInfo newInstance(long startTime, long blockRealTime, long blockThreadTime, List<MethodInfo> methodInfoList, String cpuRateInfo, boolean isCpuBusy, List gcInfos) {
         return null;
     }
 
@@ -88,6 +88,10 @@ public class BlockInfo implements Serializable {
     }
 
     public String getFrequentMethods() {
+        return null;
+    }
+
+    public String getGcEvent() {
         return null;
     }
 

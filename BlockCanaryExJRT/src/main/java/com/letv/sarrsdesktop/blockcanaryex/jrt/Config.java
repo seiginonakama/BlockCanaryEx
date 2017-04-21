@@ -53,7 +53,8 @@ public class Config implements BlockMonitor.BlockObserver {
      *
      * @return the looper you want to watch
      */
-    public Looper provideWatchLooper() {
+    public final Looper provideWatchLooper() {
+        //no ready for override, should resolve injected code invoke loop issue first
         return MAIN_LOOPER;
     }
 

@@ -33,7 +33,7 @@ public class Config implements BlockMonitor.BlockObserver {
         return null;
     }
 
-    public Looper provideWatchLooper() {
+    public final Looper provideWatchLooper() {
         return null;
     }
 

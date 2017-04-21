@@ -15,6 +15,7 @@
  */
 package com.letv.sarrsdesktop.blockcanaryex.jrt;
 
+import com.letv.sarrsdesktop.blockcanaryex.jrt.internal.GcInfo;
 import com.letv.sarrsdesktop.blockcanaryex.jrt.internal.PerformanceUtils;
 import com.letv.sarrsdesktop.blockcanaryex.jrt.internal.ProcessUtils;
 import com.letv.sarrsdesktop.blockcanaryex.jrt.internal.Serializable;
@@ -22,6 +23,7 @@ import com.letv.sarrsdesktop.blockcanaryex.jrt.internal.SerializeException;
 import com.letv.sarrsdesktop.blockcanaryex.jrt.internal.TimeUtils;
 
 import android.os.Build;
+import android.text.TextUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -73,6 +75,8 @@ public class BlockInfo implements Serializable {
     private static final String KEY_FREQUENT_METHOD_END = "---------------frequent-method-end---------------";
     private static final String KEY_ENVIRONMENT = "---------------environment-start---------------";
     private static final String KEY_ENVIRONMENT_END = "---------------environment-end---------------";
+    private static final String KEY_GC_EVENT = "---------------gc-event-start---------------";
+    private static final String KEY_GC_EVENT_END = "---------------gc-event-end---------------";
 
     private static final String KV = " = ";
     private static final String MS = "ms";
@@ -116,8 +120,9 @@ public class BlockInfo implements Serializable {
     private String topFrequentMethod;
     private String frequentMethods;
     private String envInfo;
+    private String gcEvent;
 
-    public static BlockInfo newInstance(long startTime, long blockRealTime, long blockThreadTime, List<MethodInfo> methodInfoList, String cpuRateInfo, boolean isCpuBusy) {
+    public static BlockInfo newInstance(long startTime, long blockRealTime, long blockThreadTime, List<MethodInfo> methodInfoList, String cpuRateInfo, boolean isCpuBusy, List<GcInfo> gcInfos) {
         BlockInfo blockInfo = new BlockInfo();
         blockInfo.timestamp = startTime + blockRealTime;
         blockInfo.startTime = TimeUtils.format(startTime);
@@ -128,6 +133,7 @@ public class BlockInfo implements Serializable {
         blockInfo.topHeavyMethod = generateTopHeavyMethod(blockRealTime, methodInfoList);
         blockInfo.heavyMethods = generateHeavyMethod(blockRealTime, methodInfoList);
         blockInfo.calculateFrequentMethods(blockRealTime, methodInfoList);
+        blockInfo.gcEvent = generateGcEvent(gcInfos);
         return blockInfo;
     }
 
@@ -164,6 +170,10 @@ public class BlockInfo implements Serializable {
 
     public String getTopFrequentMethod() {
         return topFrequentMethod;
+    }
+
+    public String getGcEvent() {
+        return gcEvent;
     }
 
     public String getHeavyMethods() {
@@ -282,6 +292,21 @@ public class BlockInfo implements Serializable {
         frequentMethods = frequentMethodBuilder.toString();
     }
 
+    private static String generateGcEvent(List<GcInfo> gcInfos) {
+        if(gcInfos == null || gcInfos.isEmpty()) {
+            return "";
+        }
+        StringBuilder gcInfoBuilder = new StringBuilder();
+        for(int i = 0; i < gcInfos.size(); i++) {
+            GcInfo gcInfo = gcInfos.get(i);
+            gcInfoBuilder.append(gcInfo.getGcLog());
+            if(i != gcInfos.size() - 1) {
+                gcInfoBuilder.append(SEPARATOR).append(SEPARATOR);
+            }
+        }
+        return gcInfoBuilder.toString();
+    }
+
     @Override
     public String serialize() throws SerializeException {
         StringBuilder sb = new StringBuilder();
@@ -304,6 +329,12 @@ public class BlockInfo implements Serializable {
         sb.append(KEY_FREQUENT_METHOD).append(SEPARATOR);
         sb.append(frequentMethods);
         sb.append(KEY_FREQUENT_METHOD_END).append(SEPARATOR);
+
+        if (!TextUtils.isEmpty(gcEvent)) {
+            sb.append(KEY_GC_EVENT).append(SEPARATOR);
+            sb.append(gcEvent).append(SEPARATOR);
+            sb.append(KEY_GC_EVENT_END).append(SEPARATOR);
+        }
         return sb.toString();
     }
 
@@ -317,11 +348,21 @@ public class BlockInfo implements Serializable {
             reader = new BufferedReader(in);
             boolean heavyMethodsStart = false;
             boolean frequentMethodsStart = false;
+            boolean gcEventStart = false;
             boolean envInfoStart = false;
+            StringBuilder gcLogBuilder = new StringBuilder();
             StringBuilder heavyMethodsBuilder = new StringBuilder();
             StringBuilder frequentMethodsBuilder = new StringBuilder();
             StringBuilder envInfoBuilder = new StringBuilder();
             for (String line = reader.readLine(); line != null; line = reader.readLine()) {
+                if (gcEventStart) {
+                    if (line.equals(KEY_GC_EVENT_END)) {
+                        gcEventStart = false;
+                    } else {
+                        gcLogBuilder.append(line).append(SEPARATOR);
+                    }
+                    continue;
+                }
                 if (heavyMethodsStart) {
                     if (line.equals(KEY_HEAVY_METHOD_END)) {
                         heavyMethodsStart = false;
@@ -381,6 +422,10 @@ public class BlockInfo implements Serializable {
                     timestamp = Long.valueOf(line.substring(prefix.length()));
                     continue;
                 }
+                prefix = KEY_GC_EVENT;
+                if(line.startsWith(prefix)) {
+                    gcEventStart = true;
+                }
                 prefix = KEY_HEAVY_METHOD;
                 if (line.startsWith(prefix)) {
                     heavyMethodsStart = true;
@@ -395,6 +440,7 @@ public class BlockInfo implements Serializable {
                     envInfoStart = true;
                 }
             }
+            gcEvent = gcLogBuilder.toString();
             heavyMethods = heavyMethodsBuilder.toString();
             frequentMethods = frequentMethodsBuilder.toString();
             envInfo = envInfoBuilder.toString();
