@@ -6,7 +6,7 @@ a library for android which can help you to find heavy methods in your code when
 base on [BlockCanary](https://github.com/markzhai/AndroidPerformanceMonitor).
 
 ![TextLayoutBuilder logo](./sample.jpg)
-![TextLayoutBuilder logo](./sample_gc.jpg)
+![TextLayoutBuilder logo](./sample_gc.jpeg)
 
 What's the difference between BlockCanaryEx and BlockCanary
 -------------

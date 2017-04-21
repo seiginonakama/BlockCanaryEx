@@ -6,6 +6,7 @@ BlockCanaryEx
 此项目基于 [BlockCanary](https://github.com/markzhai/AndroidPerformanceMonitor)。
 
 ![TextLayoutBuilder logo](./sample.jpg)
+![TextLayoutBuilder logo](./sample_gc.jpeg)
 
 BlockCanaryEx和BlockCanary的区别如下
 -------------
