@@ -51,10 +51,12 @@ public class GcSampler {
         private static final String CLEAR_LOGCAT_CMD = "logcat -c";
         private static final String UNFORMAT_LOGCAT_CMD = "logcat -v time %s:D *:S | grep '%d)'";
         private final String logcatCmd;
+        private final boolean isArt;
 
         public GcSamplerThread(int pid) {
             super("GcSamplerThread");
-            logcatCmd = String.format(Locale.getDefault(), UNFORMAT_LOGCAT_CMD, isArt() ? "art" : "dalvikvm", pid);
+            isArt = isArt();
+            logcatCmd = String.format(Locale.getDefault(), UNFORMAT_LOGCAT_CMD, isArt ? "art" : "dalvikvm-heap:D dalvikvm", pid);
         }
 
         @Override
@@ -71,7 +73,15 @@ public class GcSampler {
                 String gcLog;
                 while ((gcLog = bufferedReader.readLine()) != null) {
                     if(!gcLog.contains("GC")) {
-                        continue;
+                        if(isArt) {
+                            //most of useful art GC log contains 'GC', expect '"art : Suspending all threads took: 12.627ms' "
+                            if(!gcLog.contains("Suspending")) {
+                                continue;
+                            }
+                        } else if(!gcLog.contains("dalvikvm-heap")){
+                            //most of useful dalvikvm GC log contains 'GC', expect 'Grow heap (frag case) to 130.931MB for 134217741-byte allocation"
+                            continue;
+                        }
                     }
                     recordGcInfo(System.currentTimeMillis(), gcLog);
                 }
