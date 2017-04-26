@@ -15,7 +15,7 @@ import java.util.Locale;
 /**
  * author: zhoulei date: 2017/4/21.
  */
-public class GcSampler {
+class GcSampler {
     private static final List<GcInfo> GC_INFO_LIST = new LinkedList<>();
     private static GcSamplerThread sSamplerThread;
 
@@ -74,12 +74,12 @@ public class GcSampler {
                 while ((gcLog = bufferedReader.readLine()) != null) {
                     if(!gcLog.contains("GC")) {
                         if(isArt) {
-                            //most of useful art GC log contains 'GC', expect '"art : Suspending all threads took: 12.627ms' "
+                            //most of useful art GC log contains 'GC', except '"art : Suspending all threads took: 12.627ms' "
                             if(!gcLog.contains("Suspending")) {
                                 continue;
                             }
                         } else if(!gcLog.contains("dalvikvm-heap")){
-                            //most of useful dalvikvm GC log contains 'GC', expect 'Grow heap (frag case) to 130.931MB for 134217741-byte allocation"
+                            //most of useful dalvikvm GC log contains 'GC', except 'Grow heap (frag case) to 130.931MB for 134217741-byte allocation"
                             continue;
                         }
                     }
