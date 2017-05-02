@@ -13,7 +13,7 @@ What's the difference between BlockCanaryEx and BlockCanary
 - BlockCanaryEx java runtime code are modified form BlockCanary, ui and features are mostly same;
 - BlockCanaryEx add MethodSampler, knows every method's execute info (like cost-time, called-times...) when blocked;
 - BlockCanaryEx focus on the method which cost most of time when your app blocked, and display it directly to developer;
-- add gc sampler，we can know whether and when gc happened when we blocked.
+- BlockCanaryEx add gc sampler，we can know whether and when gc happened during we blocked.
 
 Download
 -------------
