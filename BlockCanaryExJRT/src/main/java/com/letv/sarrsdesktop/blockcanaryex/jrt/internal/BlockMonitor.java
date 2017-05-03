@@ -67,6 +67,8 @@ public class BlockMonitor {
         public void onStart(long startTime) {
             long currentTime = SystemClock.uptimeMillis();
             if (currentTime - mLastResetCpuSamplerTime > RESET_SAMPLER_INTERVAL) {
+                ViewPerformanceSampler.clearPerformanceInfoBefore(startTime);
+
                 ISamplerService samplerService = getServiceSyncMayNull();
                 if (samplerService != null) {
                     try {
@@ -80,7 +82,7 @@ public class BlockMonitor {
         }
 
         @Override
-        public void onBlockEvent(long realStartTime, long realTimeEnd, long threadTimeStart, long threadTimeEnd) {
+        public void onBlockEvent(long realStartTime, long realEndTime, long threadTimeStart, long threadTimeEnd) {
             List<MethodInfo> methodInfoList = MethodInfoPool.getAllUsed();
             MethodInfoPool.reset();
 
@@ -90,18 +92,19 @@ public class BlockMonitor {
             ISamplerService samplerService = getServiceSyncMayNull();
             if (samplerService != null) {
                 try {
-                    CpuInfo cpuInfo = samplerService.getCurrentCpuInfo(realStartTime, realTimeEnd);
+                    CpuInfo cpuInfo = samplerService.getCurrentCpuInfo(realStartTime, realEndTime);
                     cpuRate = cpuInfo.cpuRate;
                     isBusy = cpuInfo.isBusy;
-                    gcInfos = samplerService.popGcInfoBetween(realStartTime, realTimeEnd);
+                    gcInfos = samplerService.popGcInfoBetween(realStartTime, realEndTime);
                 } catch (RemoteException e) {
                     Log.d(TAG, "get CpuInfo or GcInfo failed.", e);
                 }
             }
-            long blockRealTime = realTimeEnd - realStartTime;
-            if(!isNotOurBusiness(methodInfoList, gcInfos, blockRealTime)) {
+            long blockRealTime = realEndTime - realStartTime;
+            List<ViewPerformanceInfo> viewPerformanceInfos = ViewPerformanceSampler.popPerformanceInfoBetween(realStartTime, realEndTime);
+            if(!isNotOurBusiness(methodInfoList, gcInfos, viewPerformanceInfos, blockRealTime)) {
                 final BlockInfo blockInfo = BlockInfo.newInstance(realStartTime, blockRealTime, threadTimeEnd - threadTimeStart,
-                        methodInfoList, cpuRate, isBusy, gcInfos);
+                        methodInfoList, cpuRate, isBusy, gcInfos, viewPerformanceInfos);
                 notifyBlocked(blockInfo);
             }
         }
@@ -116,8 +119,11 @@ public class BlockMonitor {
     private static final List<WeakReference<BlockObserver>> sBlockObservers = new ArrayList<>();
 
     //TODO why not our business, who block ui?
-    private static boolean isNotOurBusiness(List<MethodInfo> methodInfoList, List<GcInfo> gcInfos, long blockedRealTime) {
+    private static boolean isNotOurBusiness(List<MethodInfo> methodInfoList, List<GcInfo> gcInfos, List<ViewPerformanceInfo> viewPerformanceInfos, long blockedRealTime) {
         if(gcInfos != null && !gcInfos.isEmpty()) {
+            return false;
+        }
+        if(viewPerformanceInfos != null && !viewPerformanceInfos.isEmpty()) {
             return false;
         }
         if(blockedRealTime == 0) {
@@ -171,6 +177,7 @@ public class BlockMonitor {
         MethodInfoPool.setMaxBuffer(context.getResources().getInteger(R.integer.block_canary_ex_max_method_info_buffer));
         ensureMonitorInstalled();
         connectServiceIfNot();
+        ViewPerformanceSampler.install();
     }
 
     //only running on main thread

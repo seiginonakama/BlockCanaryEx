@@ -20,6 +20,7 @@ import com.letv.sarrsdesktop.blockcanaryex.jrt.BlockInfo;
 import com.letv.sarrsdesktop.blockcanaryex.jrt.R;
 
 import android.content.Context;
+import android.os.Build;
 import android.text.Html;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -44,10 +45,11 @@ final class DetailAdapter extends BaseAdapter {
     private static final int POSITION_TIME = 1;
     private static final int POSITION_ENV = 2;
     private static final int POSITION_GC = 3;
-    private static final int POSITION_TOP_HEAVY_METHOD = 4;
-    private static final int POSITION_TOP_FREQUENT_METHOD = 5;
-    private static final int POSITION_HEAVY_METHOD = 6;
-    private static final int POSITION_FREQUENT_METHOD = 7;
+    private static final int POSITION_VIEW = 4;
+    private static final int POSITION_TOP_HEAVY_METHOD = 5;
+    private static final int POSITION_TOP_FREQUENT_METHOD = 6;
+    private static final int POSITION_HEAVY_METHOD = 7;
+    private static final int POSITION_FREQUENT_METHOD = 8;
 
     private static final String FOLDING_SUFFIX = "…";
 
@@ -114,6 +116,9 @@ final class DetailAdapter extends BaseAdapter {
                 }
                 htmlString = String.format("<font color='#ff95ca'>%s</font> ", htmlString);
                 break;
+            case POSITION_VIEW:
+                htmlString = String.format("<font color='#ff00ff'>%s</font> ", htmlString);
+                break;
             case POSITION_TOP_HEAVY_METHOD:
                 htmlString = String.format("<font color='#4a86e8'>%s</font> ", htmlString);
                 break;
@@ -179,6 +184,15 @@ final class DetailAdapter extends BaseAdapter {
                     return "top-frequent-method : null";
                 }
                 return contentBuilder.append("top-frequent-method :").append(SEPARATOR).append(SEPARATOR).append(mBlockInfo.getTopFrequentMethod()).toString();
+            case POSITION_VIEW:
+                if(TextUtils.isEmpty(mBlockInfo.getViewPerformance()))  {
+                    if(Build.VERSION.SDK_INT < 20) {
+                        return "view-perf : (only work on android 20 and later)";
+                    }
+                    return "view-perf : null";
+                } else {
+                    return contentBuilder.append("view-perf :").append(SEPARATOR).append(SEPARATOR).append(mBlockInfo.getViewPerformance()).toString();
+                }
             case POSITION_GC:
                 if(TextUtils.isEmpty(mBlockInfo.getGcEvent()))  {
                     return "gc-event : null";

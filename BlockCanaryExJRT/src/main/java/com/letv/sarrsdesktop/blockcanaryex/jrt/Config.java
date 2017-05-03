@@ -90,7 +90,8 @@ public class Config implements BlockMonitor.BlockObserver {
      * @return true if it is heavy method, else false
      */
     public boolean isHeavyMethod(MethodInfo methodInfo) {
-        return methodInfo.getCostThreadTime() > 0L && methodInfo.getCostRealTimeMs() > 0L;
+        return (methodInfo.getCostThreadTime() > 0L && methodInfo.getCostRealTimeMs() > 0L)
+                || methodInfo.getCostRealTimeMs() > 2L;
     }
 
     /**
@@ -120,7 +121,8 @@ public class Config implements BlockMonitor.BlockObserver {
 
     /**
      * Path to save log, like "/blockcanary/", will save to sdcard if can. if we can't save log to sdcard (eg: no permission),
-     * we will save to "${context.getFilesDir()/${provideLogPath()}"}"
+     * else we will try to save to "${context.getExternalFilesDir("BlockCanaryEx")}${provideLogPath()}", if we failed too,
+     * we will save to "${context.getFilesDir()${provideLogPath()}"}"
      *
      * Note: running in none ui thread
      *

@@ -22,4 +22,42 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"/>
+
+    <LinearLayout
+        android:id="@+id/view_block_config"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_below="@id/gc_button">
+        <EditText
+            android:id="@+id/measure_block_time"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="measure:500ms"
+            android:inputType="number"/>
+        <EditText
+            android:id="@+id/layout_block_time"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="layout:500ms"
+            android:inputType="number"/>
+        <EditText
+            android:id="@+id/draw_block_time"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="draw:500ms"
+            android:inputType="number"/>
+    </LinearLayout>
+
+    <com.letv.sarrsdesktop.blockcanaryex.demo.ViewBlockButton
+        android:id="@+id/view_block_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="invoke view block"
+        android:layout_below="@id/view_block_config"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"/>
 </RelativeLayout>

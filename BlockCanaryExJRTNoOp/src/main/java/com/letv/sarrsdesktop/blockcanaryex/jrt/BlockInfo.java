@@ -47,7 +47,8 @@ public class BlockInfo implements Serializable {
     public static final String KEY_QUALIFIER = "qualifier";
     public static final String KEY_UID = "uid";
 
-    public static BlockInfo newInstance(long startTime, long blockRealTime, long blockThreadTime, List<MethodInfo> methodInfoList, String cpuRateInfo, boolean isCpuBusy, List gcInfos) {
+    public static BlockInfo newInstance(long startTime, long blockRealTime, long blockThreadTime, List<MethodInfo> methodInfoList, String cpuRateInfo, boolean isCpuBusy, List gcInfos,
+                                        List viewPerformanceInfos) {
         return null;
     }
 
@@ -96,6 +97,10 @@ public class BlockInfo implements Serializable {
     }
 
     public String getEnvInfo() {
+        return null;
+    }
+
+    public String getViewPerformance() {
         return null;
     }
 

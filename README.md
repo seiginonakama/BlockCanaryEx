@@ -7,6 +7,7 @@ base on [BlockCanary](https://github.com/markzhai/AndroidPerformanceMonitor).
 
 ![TextLayoutBuilder logo](./sample.jpg)
 ![TextLayoutBuilder logo](./sample_gc.jpeg)
+![TextLayoutBuilder logo](./sample_view.jpg)
 
 What's the difference between BlockCanaryEx and BlockCanary
 -------------
@@ -14,6 +15,7 @@ What's the difference between BlockCanaryEx and BlockCanary
 - BlockCanaryEx add MethodSampler, knows every method's execute info (like cost-time, called-times...) when blocked;
 - BlockCanaryEx focus on the method which cost most of time when your app blocked, and display it directly to developer;
 - BlockCanaryEx add gc sampler，we can know whether and when gc happened during we blocked.
+- add view performance sampler, we can know the detail about view measure, layout, draw during we blocked.
 
 Download
 -------------
@@ -35,9 +37,9 @@ apply plugin: 'blockcanaryex'
 ```
 
 ```groovy
-debugCompile 'com.letv.sarrsdesktop:BlockCanaryExJRT:0.9.6.1'
-releaseCompile 'com.letv.sarrsdesktop:BlockCanaryExJRTNoOp:0.9.6'
-testCompile 'com.letv.sarrsdesktop:BlockCanaryExJRTNoOp:0.9.6'
+debugCompile 'com.letv.sarrsdesktop:BlockCanaryExJRT:0.9.7'
+releaseCompile 'com.letv.sarrsdesktop:BlockCanaryExJRTNoOp:0.9.7'
+testCompile 'com.letv.sarrsdesktop:BlockCanaryExJRTNoOp:0.9.7'
 ```
 
 Basic Usage

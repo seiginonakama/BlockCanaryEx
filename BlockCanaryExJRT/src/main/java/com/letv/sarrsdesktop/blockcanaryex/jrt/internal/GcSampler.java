@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -25,6 +26,22 @@ class GcSampler {
                 if (sSamplerThread == null) {
                     sSamplerThread = new GcSamplerThread(pid);
                     sSamplerThread.start();
+                }
+            }
+        }
+    }
+
+    static void clearGcInfoBefore(long time) {
+        synchronized (GC_INFO_LIST) {
+            if(!GC_INFO_LIST.isEmpty()) {
+                Iterator<GcInfo> iterator = GC_INFO_LIST.iterator();
+                while (iterator.hasNext()) {
+                    GcInfo gcInfo = iterator.next();
+                    if (gcInfo.getHappenedTime() < time) {
+                        iterator.remove();
+                    } else {
+                        break;
+                    }
                 }
             }
         }

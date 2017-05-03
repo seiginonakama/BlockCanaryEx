@@ -225,6 +225,10 @@ public class LogWriter {
             return Environment.getExternalStorageDirectory().getPath() + logPath;
         }
         Context context = BlockCanaryEx.getConfig().getContext();
+        File externalFilesDir = context.getExternalFilesDir("BlockCanaryEx");
+        if(externalFilesDir != null && externalFilesDir.canWrite()) {
+            return externalFilesDir.getAbsolutePath() + logPath;
+        }
         return context.getFilesDir().getAbsolutePath() + logPath;
     }
 

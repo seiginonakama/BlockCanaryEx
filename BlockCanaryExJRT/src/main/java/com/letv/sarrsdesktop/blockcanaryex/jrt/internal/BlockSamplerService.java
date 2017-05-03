@@ -33,6 +33,7 @@ public class BlockSamplerService extends Service {
         public void resetSampler(int pid, long startTime) throws RemoteException {
             synchronized (CPU_SAMPLER_LOCK) {
                 GcSampler.startIfNot(pid);
+                GcSampler.clearGcInfoBefore(startTime);
                 CpuSampler.getInstance().resetSampler(pid);
             }
         }

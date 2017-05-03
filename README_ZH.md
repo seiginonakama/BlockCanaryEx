@@ -7,13 +7,15 @@ BlockCanaryEx
 
 ![TextLayoutBuilder logo](./sample.jpg)
 ![TextLayoutBuilder logo](./sample_gc.jpeg)
+![TextLayoutBuilder logo](./sample_view.jpg)
 
 BlockCanaryEx和BlockCanary的区别如下
 -------------
 - BlockCanaryEx的运行时代码修改自BlockCanary，ui和大部分功能基本一致;
 - BlockCanaryEx添加了方法采样，知道主线程中所有方法的执行时间和执行次数;
 - 当应用卡顿时，BlockCanaryEx更关注app代码中，哪些方法耗时最多，重点记录和显示这些耗时方法；
-- 添加了gc采样，当应用卡顿时，我们可以知道卡顿时是否发生了gc，以及gc的时间。
+- 添加了gc采样，当应用卡顿时，我们可以知道卡顿时是否发生了gc，以及gc的时间；
+- 监控view性能，计算卡顿时，view的measure,layout,draw消耗的时间。
 
 安装
 -------------
@@ -35,9 +37,9 @@ apply plugin: 'blockcanaryex'
 ```
 
 ```groovy
-debugCompile 'com.letv.sarrsdesktop:BlockCanaryExJRT:0.9.6.1'
-releaseCompile 'com.letv.sarrsdesktop:BlockCanaryExJRTNoOp:0.9.6'
-testCompile 'com.letv.sarrsdesktop:BlockCanaryExJRTNoOp:0.9.6'
+debugCompile 'com.letv.sarrsdesktop:BlockCanaryExJRT:0.9.7'
+releaseCompile 'com.letv.sarrsdesktop:BlockCanaryExJRTNoOp:0.9.7'
+testCompile 'com.letv.sarrsdesktop:BlockCanaryExJRTNoOp:0.9.7'
 ```
 
 基础使用

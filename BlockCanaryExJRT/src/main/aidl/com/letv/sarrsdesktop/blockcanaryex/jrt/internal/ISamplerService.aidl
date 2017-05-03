@@ -18,7 +18,7 @@ import com.letv.sarrsdesktop.blockcanaryex.jrt.internal.CpuInfo;
 import com.letv.sarrsdesktop.blockcanaryex.jrt.internal.GcInfo;
 
 interface ISamplerService {
-    void resetSampler(int pid, long startTime);
-    CpuInfo getCurrentCpuInfo(long startTime, long endTime);
-    List<GcInfo> popGcInfoBetween(long startTime, long endTime);
+    void resetSampler(int pid, long startTimeMs);
+    CpuInfo getCurrentCpuInfo(long startTimeMs, long endTimeMs);
+    List<GcInfo> popGcInfoBetween(long startTimeMs, long endTimeMs);
 }
