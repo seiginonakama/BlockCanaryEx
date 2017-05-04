@@ -81,29 +81,39 @@ class GcSampler {
             Runtime runtime = Runtime.getRuntime();
             Process process;
             InputStream inputStream;
-            BufferedReader bufferedReader;
-            try {
-                runtime.exec(CLEAR_LOGCAT_CMD).waitFor();
-                process = runtime.exec(logcatCmd);
-                inputStream = process.getInputStream();
-                bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-                String gcLog;
-                while ((gcLog = bufferedReader.readLine()) != null) {
-                    if(!gcLog.contains("GC")) {
-                        if(isArt) {
-                            //most of useful art GC log contains 'GC', except '"art : Suspending all threads took: 12.627ms' "
-                            if(!gcLog.contains("Suspending")) {
+            BufferedReader bufferedReader = null;
+            for (;;){
+                try {
+                    runtime.exec(CLEAR_LOGCAT_CMD).waitFor();
+                    process = runtime.exec(logcatCmd);
+                    inputStream = process.getInputStream();
+                    bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+                    String gcLog;
+                    while ((gcLog = bufferedReader.readLine()) != null) {
+                        if (!gcLog.contains("GC")) {
+                            if (isArt) {
+                                //most of useful art GC log contains 'GC', except '"art : Suspending all threads took: 12.627ms' "
+                                if (!gcLog.contains("Suspending")) {
+                                    continue;
+                                }
+                            } else if (!gcLog.contains("dalvikvm-heap")) {
+                                //most of useful dalvikvm GC log contains 'GC', except 'Grow heap (frag case) to 130.931MB for 134217741-byte allocation"
                                 continue;
                             }
-                        } else if(!gcLog.contains("dalvikvm-heap")){
-                            //most of useful dalvikvm GC log contains 'GC', except 'Grow heap (frag case) to 130.931MB for 134217741-byte allocation"
-                            continue;
+                        }
+                        recordGcInfo(System.currentTimeMillis(), gcLog);
+                    }
+                } catch (IOException | InterruptedException e) {
+                    e.printStackTrace();
+                } finally {
+                    if (bufferedReader != null) {
+                        try {
+                            bufferedReader.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
                         }
                     }
-                    recordGcInfo(System.currentTimeMillis(), gcLog);
                 }
-            } catch (IOException | InterruptedException e) {
-                e.printStackTrace();
             }
         }
     }
