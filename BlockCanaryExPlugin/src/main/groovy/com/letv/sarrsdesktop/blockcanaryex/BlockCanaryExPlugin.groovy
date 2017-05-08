@@ -44,9 +44,11 @@ public class BlockCanaryExPlugin implements Plugin<Project> {
         SCOPES.add(QualifiedContent.Scope.EXTERNAL_LIBRARIES);
     }
 
-    private List<String> mExcludePackages = ["com.letv.sarrsdesktop.blockcanaryex.jrt", "javassist"];
+    private List<String> mExcludePackages = ["com.letv.sarrsdesktop.blockcanaryex.jrt.internal", "javassist"];
 
-    private List<String> mExcludeClasses = [];
+    private List<String> mExcludeClasses = ["com.letv.sarrsdesktop.blockcanaryex.jrt.BlockInfo", "com.letv.sarrsdesktop.blockcanaryex.jrt.BlockCanaryEx",
+                                            "com.letv.sarrsdesktop.blockcanaryex.jrt.Config", "com.letv.sarrsdesktop.blockcanaryex.jrt.FrequentMethodInfo",
+                                            "com.letv.sarrsdesktop.blockcanaryex.jrt.MethodInfo"];
 
     private List<String> mIncludePackages = [];
 

@@ -102,7 +102,8 @@ public class BlockMonitor {
             }
             long blockRealTime = realEndTime - realStartTime;
             List<ViewPerformanceInfo> viewPerformanceInfos = ViewPerformanceSampler.popPerformanceInfoBetween(realStartTime, realEndTime);
-            if(!isNotOurBusiness(methodInfoList, gcInfos, viewPerformanceInfos, blockRealTime)) {
+            //ignore the block from block canary
+            if (!isBlockCanaryExBlocked(methodInfoList)) {
                 final BlockInfo blockInfo = BlockInfo.newInstance(realStartTime, blockRealTime, threadTimeEnd - threadTimeStart,
                         methodInfoList, cpuRate, isBusy, gcInfos, viewPerformanceInfos);
                 notifyBlocked(blockInfo);
@@ -118,26 +119,17 @@ public class BlockMonitor {
     private static final LooperMonitor LOOPER_MONITOR = new LooperMonitor(BLOCK_LISTENER);
     private static final List<WeakReference<BlockObserver>> sBlockObservers = new ArrayList<>();
 
-    //TODO why not our business, who block ui?
-    private static boolean isNotOurBusiness(List<MethodInfo> methodInfoList, List<GcInfo> gcInfos, List<ViewPerformanceInfo> viewPerformanceInfos, long blockedRealTime) {
-        if(gcInfos != null && !gcInfos.isEmpty()) {
+    private static boolean isBlockCanaryExBlocked(List<MethodInfo> methodInfos) {
+        if(methodInfos == null) {
             return false;
         }
-        if(viewPerformanceInfos != null && !viewPerformanceInfos.isEmpty()) {
-            return false;
-        }
-        if(blockedRealTime == 0) {
-            return false;
-        }
-        long totalTime = 0;
-        for(MethodInfo methodInfo : methodInfoList) {
-            long costRealTime = methodInfo.getCostRealTimeMs();
-            if((float)(costRealTime) / blockedRealTime > 0.01) {
-                return false;
+        MethodInfo top = null;
+        for(MethodInfo methodInfo : methodInfos) {
+            if(top == null || top.getCostRealTimeMs() < methodInfo.getCostRealTimeMs()) {
+                top = methodInfo;
             }
-            totalTime += costRealTime;
         }
-        return ((float)totalTime) / blockedRealTime < 0.1;
+        return top != null && top.getClassName().startsWith("com.letv.sarrsdesktop.blockcanaryex.jrt");
     }
 
     private static void notifyBlocked(BlockInfo blockInfo) {

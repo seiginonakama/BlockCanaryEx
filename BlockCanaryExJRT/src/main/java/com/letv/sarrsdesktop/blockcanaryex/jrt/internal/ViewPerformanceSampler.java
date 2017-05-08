@@ -51,6 +51,14 @@ class ViewPerformanceSampler {
                 TracePoint tracePoint = TRACE_POINTS.pop();
                 ViewPerformanceInfo info = null;
                 switch (tracePoint.mMethodName) {
+                    case "input":
+                        info = new ViewPerformanceInfo(ViewPerformanceInfo.TYPE_INPUT,
+                                tracePoint.mStartTime, endTime);
+                        break;
+                    case "animation":
+                        info = new ViewPerformanceInfo(ViewPerformanceInfo.TYPE_ANIMATION,
+                                tracePoint.mStartTime, endTime);
+                        break;
                     case "measure":
                         info = new ViewPerformanceInfo(ViewPerformanceInfo.TYPE_MEASURE,
                                 tracePoint.mStartTime, endTime);
@@ -61,6 +69,10 @@ class ViewPerformanceSampler {
                         break;
                     case "draw":
                         info = new ViewPerformanceInfo(ViewPerformanceInfo.TYPE_DRAW,
+                                tracePoint.mStartTime, endTime);
+                        break;
+                    case "commit":
+                        info = new ViewPerformanceInfo(ViewPerformanceInfo.TYPE_COMMIT,
                                 tracePoint.mStartTime, endTime);
                         break;
                 }
