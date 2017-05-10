@@ -58,7 +58,8 @@ public class BlockMonitor {
     private static final LooperMonitor.BlockListener BLOCK_LISTENER = new LooperMonitor.BlockListener() {
         @Override
         public void beforeFirstStart(long firstStartTime, long firstStartThreadTime) {
-            if (BlockCanaryEx.getConfig().isBlock(INSTALLED_TIME, firstStartTime, INSTALLED_THREAD_TIME, firstStartThreadTime)) {
+            if (BlockCanaryEx.getConfig().isBlock(INSTALLED_TIME, firstStartTime, INSTALLED_THREAD_TIME, firstStartThreadTime,
+                    LOOPER_MONITOR.currentCreatingActivity, true)) {
                 onBlockEvent(INSTALLED_TIME, firstStartTime, INSTALLED_THREAD_TIME, firstStartThreadTime);
             }
         }
@@ -145,8 +146,8 @@ public class BlockMonitor {
         }
     }
 
-    public static void reportMethodProfile(final String cls, final String method, final String paramTypes, final long startTimeNano, final long startThreadTime,
-                                           final long endTimeNano, final long endThreadTime) {
+    static void reportMethodProfile(final String cls, final String method, final String paramTypes, final long startTimeNano, final long startThreadTime,
+                                    final long endTimeNano, final long endThreadTime) {
         SamplerReportHandler.getInstance().post(new Runnable() {
             @Override
             public void run() {
@@ -158,6 +159,10 @@ public class BlockMonitor {
                 methodInfo.setCostThreadTime(endThreadTime - startThreadTime);
             }
         });
+    }
+
+    static void reportActivityCreated(final String activityClass) {
+        LOOPER_MONITOR.currentCreatingActivity = activityClass;
     }
 
     public static void registerBlockObserver(BlockObserver blockObserver) {

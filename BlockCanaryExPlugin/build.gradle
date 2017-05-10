@@ -18,7 +18,7 @@ dependencies {
 targetCompatibility = JavaVersion.VERSION_1_7
 sourceCompatibility = JavaVersion.VERSION_1_7
 
-version = "0.9.8"
+version = "0.9.8.1"
 group = "com.letv.sarrsdesktop"
 
 def siteUrl = 'https://github.com/lqcandqq13/BlockCanaryEx'    // project homepage

@@ -116,6 +116,14 @@ class SamplerInjecter {
         ctBehavior.addLocalVariable("__bl_stn", CtClass.longType);
         ctBehavior.addLocalVariable("__bl_stt", CtClass.longType);
         ctBehavior.addLocalVariable("__bl_icl", CtClass.booleanType);
+        boolean isActivityCreating = false;
+        String className = generateClassName(clazz)
+        String paramTypes = generateParamTypes(ctBehavior.parameterTypes)
+        if(isChildOf(clazz, "android.app.Activity")
+                && ctBehavior.name == "onCreate"
+                && paramTypes == 'android.os.Bundle') {
+            isActivityCreating = true;
+        }
         ctBehavior.insertBefore(
                 """
                   __bl_stn = 0L;
@@ -129,9 +137,23 @@ class SamplerInjecter {
         ctBehavior.insertAfter(
                 """
                    if(__bl_icl) {
-                       com.letv.sarrsdesktop.blockcanaryex.jrt.internal.MethodSampler.onMethodExit(__bl_stn, __bl_stt, "${generateClassName(clazz)}", "${ctBehavior.name}", "${generateParamTypes(ctBehavior.parameterTypes)}");
+                       ${isActivityCreating ? "com.letv.sarrsdesktop.blockcanaryex.jrt.internal.MethodSampler.reportActivityCreated(\"${className}\");" : ""}
+                       com.letv.sarrsdesktop.blockcanaryex.jrt.internal.MethodSampler.onMethodExit(__bl_stn, __bl_stt, "${className}", "${ctBehavior.name}", "${paramTypes}");
                    }
                 """)
+    }
+
+    static boolean isChildOf(CtClass ctClass, String className) {
+        if(ctClass.name == className) {
+            return true
+        } else {
+            CtClass superCls = ctClass.getSuperclass()
+            if(superCls != null) {
+                return isChildOf(superCls, className)
+            } else {
+                return false;
+            }
+        }
     }
 
     static String generateClassName(CtClass clazz) {

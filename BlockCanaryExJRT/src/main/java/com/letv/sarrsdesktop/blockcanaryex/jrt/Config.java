@@ -75,10 +75,17 @@ public class Config implements BlockMonitor.BlockObserver {
      * @param endTime in mills
      * @param startThreadTime in mills
      * @param endThreadTime in mills
+     * @param creatingActivity current creatingActivity class name, nullable
+     * @param isApplicationCreating is application creating
      * @return true if blocked, else false
      */
-    public boolean isBlock(long startTime, long endTime, long startThreadTime, long endThreadTime) {
-        return (endTime - startTime) > 100L && (endThreadTime - startThreadTime) > 8L;
+    public boolean isBlock(long startTime, long endTime, long startThreadTime, long endThreadTime,
+                           String creatingActivity, boolean isApplicationCreating) {
+        if(creatingActivity != null || isApplicationCreating) {
+            return (endTime - startTime) > 250L;
+        } else {
+            return (endTime - startTime) > 100L && (endThreadTime - startThreadTime) > 8L;
+        }
     }
 
     /**

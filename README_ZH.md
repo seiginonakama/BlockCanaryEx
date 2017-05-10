@@ -26,7 +26,7 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:1.5.0' //version must >= 1.5.0
-        classpath 'com.letv.sarrsdesktop:BlockCanaryExPlugin:0.9.8'
+        classpath 'com.letv.sarrsdesktop:BlockCanaryExPlugin:0.9.8.1'
     }
 }
 ```
@@ -36,9 +36,9 @@ apply plugin: 'blockcanaryex'
 ```
 
 ```groovy
-debugCompile 'com.letv.sarrsdesktop:BlockCanaryExJRT:0.9.8'
-releaseCompile 'com.letv.sarrsdesktop:BlockCanaryExJRTNoOp:0.9.8'
-testCompile 'com.letv.sarrsdesktop:BlockCanaryExJRTNoOp:0.9.8'
+debugCompile 'com.letv.sarrsdesktop:BlockCanaryExJRT:0.9.8.1'
+releaseCompile 'com.letv.sarrsdesktop:BlockCanaryExJRTNoOp:0.9.8.1'
+testCompile 'com.letv.sarrsdesktop:BlockCanaryExJRTNoOp:0.9.8.1'
 ```
 
 基础使用
@@ -99,15 +99,6 @@ BlockCanaryEx在编译期，通过字节码注入，将方法采样器注入到�
           super.onCreate();
           BlockCanaryEx.install(new Config(this) {
               /**
-               * provide the looper to watch, default is Looper.mainLooper()
-               *
-               * @return the looper you want to watch
-               */
-              public Looper provideWatchLooper() {
-                  return Looper.getMainLooper();
-              }
-
-              /**
                * If need notification to notice block.
                *
                * @return true if need, else if not need.
@@ -124,11 +115,17 @@ BlockCanaryEx在编译期，通过字节码注入，将方法采样器注入到�
                * @param endTime in mills
                * @param startThreadTime in mills
                * @param endThreadTime in mills
+               * @param creatingActivity current creatingActivity class name, nullable
+               * @param isApplicationCreating is application creating
                * @return true if blocked, else false
                */
-              public boolean isBlock(long startTime, long endTime, long startThreadTime, long endThreadTime) {
-                  long costRealTime = endTime - startTime;
-                  return costRealTime > 100L && costRealTime < 2 * (endThreadTime - startThreadTime);
+              public boolean isBlock(long startTime, long endTime, long startThreadTime, long endThreadTime,
+                                     String creatingActivity, boolean isApplicationCreating) {
+                  if(creatingActivity != null || isApplicationCreating) {
+                      return (endTime - startTime) > 250L;
+                  } else {
+                      return (endTime - startTime) > 100L && (endThreadTime - startThreadTime) > 8L;
+                  }
               }
 
               /**
@@ -136,11 +133,12 @@ BlockCanaryEx在编译期，通过字节码注入，将方法采样器注入到�
                *
                * Note: running in none ui thread
                *
-               * @param methodInfo {@link com.letv.sarrsdesktop.blockcanaryex.jrt.MethodInfo}
+               * @param methodInfo {@link MethodInfo}
                * @return true if it is heavy method, else false
                */
-              public boolean isHeavyMethod(com.letv.sarrsdesktop.blockcanaryex.jrt.MethodInfo methodInfo) {
-                  return methodInfo.getCostThreadTime() >= 1L;
+              public boolean isHeavyMethod(MethodInfo methodInfo) {
+                  return (methodInfo.getCostThreadTime() > 0L && methodInfo.getCostRealTimeMs() > 0L)
+                          || methodInfo.getCostRealTimeMs() > 2L;
               }
 
               /**
@@ -156,8 +154,22 @@ BlockCanaryEx在编译期，通过字节码注入，将方法采样器注入到�
               }
 
               /**
-               * Path to save log, like "/blockcanary/", will save to sdcard if can, else we will save to
-               * "${context.getFilesDir()/${provideLogPath()}"}"
+               * we will save block log to sdcard by default, if you want to disable this, just return false
+               *
+               * Warning: if save log disabled, new BlockInfo will not be displayed in DisplayActivity
+               *
+               * Note: running in none ui thread
+               *
+               * @return false to disable save log
+               */
+              public boolean enableSaveLog() {
+                  return true;
+              }
+
+              /**
+               * Path to save log, like "/blockcanary/", will save to sdcard if can. if we can't save log to sdcard (eg: no permission),
+               * else we will try to save to "${context.getExternalFilesDir("BlockCanaryEx")}${provideLogPath()}", if we failed too,
+               * we will save to "${context.getFilesDir()${provideLogPath()}"}"
                *
                * Note: running in none ui thread
                *

@@ -36,6 +36,8 @@ class LooperMonitor implements Printer {
         }
     };
 
+    String currentCreatingActivity = null;
+
     //running on SamplerReportThread
     interface BlockListener {
         void beforeFirstStart(long firstStartTime, long firstStartThreadTime);
@@ -81,6 +83,7 @@ class LooperMonitor implements Printer {
 
         if(!mPrintingStarted) {
             mPrintingStarted = true;
+            currentCreatingActivity = null;
             mStartTimestamp = System.currentTimeMillis();
             mStartThreadTimestamp = SystemClock.currentThreadTimeMillis();
             final long startTime = mStartThreadTimestamp;
@@ -100,7 +103,8 @@ class LooperMonitor implements Printer {
             final long endTime = System.currentTimeMillis();
             final long startThreadTime = mStartThreadTimestamp;
             final long endThreadTime = SystemClock.currentThreadTimeMillis();
-            if(config.isBlock(startTime, endTime, startThreadTime, endThreadTime)) {
+            if(config.isBlock(startTime, endTime, startThreadTime, endThreadTime,
+                    currentCreatingActivity, false)) {
                 SamplerReportHandler.getInstance().post(new Runnable() {
                     @Override
                     public void run() {
@@ -110,6 +114,7 @@ class LooperMonitor implements Printer {
             } else {
                 SamplerReportHandler.getInstance().post(mNotifyActionNoBlock);
             }
+            currentCreatingActivity = null;
         }
     }
 

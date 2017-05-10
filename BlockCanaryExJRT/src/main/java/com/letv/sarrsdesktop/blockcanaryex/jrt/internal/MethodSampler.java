@@ -47,4 +47,11 @@ public class MethodSampler {
 
         BlockMonitor.reportMethodProfile(cls, method, argTypes, startTimeNano, startThreadTime, System.nanoTime(), SystemClock.currentThreadTimeMillis());
     }
+
+    /**
+     * this method called by injected code, so do't delete this
+     */
+    public static void reportActivityCreated(String activityClass) {
+        BlockMonitor.reportActivityCreated(activityClass);
+    }
 }
