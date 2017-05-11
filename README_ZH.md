@@ -76,9 +76,9 @@ BlockCanaryEx在编译期，通过字节码注入，将方法采样器注入到�
   block {
       debugEnabled true //在debug模式下开启方法采样，默认为true
       releaseEnabled false //在release模式下开启方法采样，默认为false
-      excludePackages [] //不希望进行方法采样的包名, 比如: ['com.android', 'android.support']
-      excludeClasses [] //不希望进行方法采样的类名
-      includePackages [] //指定开启方法采样的包名，如果不为空，则其它没有包括进来的包都不会开启方法采样
+      excludePackages = [] //不希望进行方法采样的包名, 比如: ['com.android', 'android.support']
+      excludeClasses = [] //不希望进行方法采样的类名
+      includePackages = [] //指定开启方法采样的包名，如果不为空，则其它没有包括进来的包都不会开启方法采样
 
       scope {
           project true //开启主项目代码方法采样，默认为true

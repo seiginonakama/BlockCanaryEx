@@ -79,9 +79,9 @@ the scope to watch more method performance, you can do the config in gradle.
   block {
       debugEnabled true //enable MethodSampler when debug mode, default true
       releaseEnabled false //enable MethodSampler when release mode, default false
-      excludePackages [] //exclude the package you don't want to inject MethodSampler, eg: ['com.android', 'android.support']
-      excludeClasses [] //exclude the class you don't want to inject MethodSampler
-      includePackages [] //only include the package you want to inject MethodSampler, packages which don't included will not be injected
+      excludePackages = [] //exclude the package you don't want to inject MethodSampler, eg: ['com.android', 'android.support']
+      excludeClasses = [] //exclude the class you don't want to inject MethodSampler
+      includePackages = [] //only include the package you want to inject MethodSampler, packages which don't included will not be injected
 
       scope {
           project true //inject MethodSampler for app project, default true
