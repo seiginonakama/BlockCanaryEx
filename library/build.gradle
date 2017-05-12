@@ -1,9 +1,9 @@
-apply plugin: 'com.android.application'
+apply plugin: 'com.android.library'
 apply plugin: 'blockcanaryex'
 
 block {
-    debugEnabled true //enable MethodSampler when debug mode, default true
-    releaseEnabled false //enable MethodSampler when release mode, default false
+    //library project only has release status
+    releaseEnabled true //enable MethodSampler when release mode, default false
     excludePackages = ['com.android', 'android.support'] //exclude the package you don't want to inject MethodSampler, eg: ['com.android', 'android.support']
     excludeClasses = [] //exclude the class you don't want to inject MethodSampler
     includePackages = [] //only include the package you want to inject MethodSampler, packages which don't included will not be injected
@@ -18,31 +18,34 @@ block {
 }
 
 android {
-    android {
-        useLibrary 'org.apache.http.legacy'
-    }
     compileSdkVersion 25
     buildToolsVersion "25.0.2"
 
     defaultConfig {
-        applicationId "com.letv.sarrsdesktop.blockcanaryex.demo"
         minSdkVersion 16
         targetSdkVersion 25
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
     }
     buildTypes {
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile('proguard-android.txt')
         }
     }
 }
 
+String SDK_DIR = System.getenv("ANDROID_HOME")
+if(SDK_DIR == null) {
+    Properties props = new Properties()
+    props.load(new FileInputStream(project.rootProject.file("local.properties")))
+    SDK_DIR = props.get('sdk.dir');
+}
+
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    provided files("${SDK_DIR}/platforms/android-23/data/layoutlib.jar")
     compile project(':BlockCanaryExJRT')
-//    compile project(':library')
-//    debugCompile 'com.letv.sarrsdesktop:BlockCanaryExJRT:0.9.8.2'
-//    releaseCompile 'com.letv.sarrsdesktop:BlockCanaryExJRTNoOp:0.9.8.2'
-//    testCompile 'com.letv.sarrsdesktop:BlockCanaryExJRTNoOp:0.9.8.2'
-    compile 'com.android.support:appcompat-v7:25.1.0'
 }

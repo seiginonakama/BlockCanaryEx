@@ -18,12 +18,17 @@ package com.letv.sarrsdesktop.blockcanaryex
 import com.android.build.api.transform.*
 import com.android.build.gradle.AppPlugin
 import com.android.build.gradle.LibraryPlugin
-import com.android.build.gradle.internal.api.ApplicationVariantImpl
+import com.android.build.gradle.api.ApplicationVariant
+import com.android.build.gradle.api.BaseVariant
+import com.android.build.gradle.api.LibraryVariant
+import com.android.build.gradle.internal.variant.BaseVariantData
+import com.android.builder.model.AndroidLibrary
 import org.apache.commons.io.FileUtils
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.internal.hash.HashUtil
+
 /**
  * author: zhoulei date: 2017/2/28.
  */
@@ -62,6 +67,13 @@ public class BlockCanaryExPlugin implements Plugin<Project> {
             throw new IllegalStateException("'android' or 'android-library' plugin required.")
         }
 
+        if (hasLib) {
+            //Transforms with scopes '[SUB_PROJECTS, SUB_PROJECTS_LOCAL_DEPS, EXTERNAL_LIBRARIES]' cannot be applied to library projects.
+            SCOPES.remove(QualifiedContent.Scope.SUB_PROJECTS)
+            SCOPES.remove(QualifiedContent.Scope.SUB_PROJECTS_LOCAL_DEPS)
+            SCOPES.remove(QualifiedContent.Scope.EXTERNAL_LIBRARIES)
+        }
+
         project.extensions.create("block", BlockCanaryExExtension)
 
         BlockCanaryExExtension block = project.block;
@@ -88,11 +100,22 @@ public class BlockCanaryExPlugin implements Plugin<Project> {
 
             @Override
             public void transform(TransformInvocation transformInvocation) throws TransformException, InterruptedException, IOException {
-                boolean isDebug = isDebug(transformInvocation)
-                if ((isDebug && !block.debugEnabled)
-                        || (!isDebug && !block.releaseEnabled)) {
-                    mCareScopes.clear();
-                    println("block canary ex disabled")
+                boolean enable = true;
+                if(hasLib && !block.releaseEnabled) {
+                    //library only has release status
+                    println("BlockCanaryEx only enable when library project releaseEnabled = true")
+                    enable = false;
+                } else {
+                    boolean isDebug = isDebug(transformInvocation)
+                    if ((isDebug && !block.debugEnabled)
+                            || (!isDebug && !block.releaseEnabled)) {
+                        enable = false;
+                        println("block canary ex disabled")
+                    }
+                }
+
+                if(!enable) {
+                    mCareScopes.clear()
                 } else {
                     setFilter(block)
                     setCareScope(block.getScope())
@@ -103,9 +126,15 @@ public class BlockCanaryExPlugin implements Plugin<Project> {
                 Collection<TransformInput> transformInputs = transformInvocation.getInputs();
                 List<File> processFileList = new ArrayList<>();
                 Set<File> classPath = new HashSet<>()
-                ApplicationVariantImpl applicationVariant = project.android.applicationVariants.getAt(0);
-                JavaCompile javaCompile = applicationVariant.javaCompile;
-                classPath.addAll(javaCompile.classpath.files)
+
+                obtainProjectClassPath(project, classPath)
+
+                BaseVariant baseVariant;
+                if (hasApp) {
+                    baseVariant = project.android.applicationVariants.getAt(0)
+                } else {
+                    baseVariant = project.android.getLibraryVariants().getAt(0)
+                }
 
                 for (TransformInput transformInput : transformInputs) {
                     Collection<JarInput> jarInputs = transformInput.getJarInputs();
@@ -133,7 +162,7 @@ public class BlockCanaryExPlugin implements Plugin<Project> {
                         FileUtils.copyDirectory(directoryInput.getFile(), output);
                     }
                 }
-                classPath.addAll(applicationVariant.androidBuilder.computeFullBootClasspath())
+                classPath.addAll(baseVariant.androidBuilder.computeFullBootClasspath())
                 SamplerInjecter.setClassPath(classPath);
                 for (File processFile : processFileList) {
                     SamplerInjecter.processClassPath(processFile,
@@ -184,12 +213,12 @@ public class BlockCanaryExPlugin implements Plugin<Project> {
         File preConfigFile = new File(project.getBuildDir().absolutePath + "${I}BlockCanaryEx${I}config.properties");
         String nowHash = block.generateHash()
         Properties properties = new Properties()
-        if(!preConfigFile.exists()) {
+        if (!preConfigFile.exists()) {
             cleanTransformsDir(project)
         } else {
             properties.load(preConfigFile.newDataInputStream())
             String preHash = properties.getProperty("hash")
-            if(!nowHash.equals(preHash)) {
+            if (!nowHash.equals(preHash)) {
                 cleanTransformsDir(project)
             }
         }
@@ -202,5 +231,45 @@ public class BlockCanaryExPlugin implements Plugin<Project> {
     static void cleanTransformsDir(Project project) {
         File transformsDir = new File(project.getBuildDir().absolutePath + "${I}intermediates${I}transforms${I}${TRANSFORM_NAME}")
         FileUtils.deleteDirectory(transformsDir)
+    }
+
+    static void obtainProjectClassPath(Project project, Set<String> classPath) {
+        def hasApp = project.plugins.withType(AppPlugin)
+        def hasLib = project.plugins.withType(LibraryPlugin)
+
+        JavaCompile javaCompile = null;
+        BaseVariantData baseVariantData = null;
+        if (hasApp) {
+            ApplicationVariant applicationVariant = project.android.applicationVariants.getAt(0)
+            javaCompile = applicationVariant.javaCompile;
+            baseVariantData = applicationVariant.variantData;
+        } else if (hasLib) {
+            LibraryVariant libraryVariant = project.android.getLibraryVariants().getAt(0);
+            javaCompile = libraryVariant.javaCompile;
+            baseVariantData = libraryVariant.variantData;
+        }
+
+        if (javaCompile != null) {
+            classPath.addAll(javaCompile.classpath.files)
+        }
+
+        if (baseVariantData != null) {
+            List<AndroidLibrary> androidLibraries = baseVariantData.variantDependency.getCompileDependencies().androidDependencies
+            for (AndroidLibrary library : androidLibraries) {
+                String projectName = library.getProject()
+                if (projectName != null) {
+                    Set<Project> allProject = project.getRootProject().allprojects
+                    for (Project p : allProject) {
+                        if (p == project) {
+                            continue
+                        }
+                        if (":" + p.name == projectName) {
+                            obtainProjectClassPath(p, classPath)
+                            break
+                        }
+                    }
+                }
+            }
+        }
     }
 }

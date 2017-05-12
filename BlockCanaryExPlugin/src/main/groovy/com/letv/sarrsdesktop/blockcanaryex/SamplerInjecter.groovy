@@ -109,9 +109,9 @@ class SamplerInjecter {
         boolean isActivityCreating = false;
         String className = generateClassName(clazz)
         String paramTypes = generateParamTypes(ctBehavior.parameterTypes)
-        if(isChildOf(clazz, "android.app.Activity")
-                && ctBehavior.name == "onCreate"
-                && paramTypes == 'android.os.Bundle') {
+        if(ctBehavior.name == "onCreate"
+                && paramTypes == 'android.os.Bundle'
+                && isChildOf(clazz, "android.app.Activity")) {
             isActivityCreating = true;
         }
         ctBehavior.insertBefore(
