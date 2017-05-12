@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
     private void doHeavyWork() {
         long startTime = System.currentTimeMillis();
         Random random = new Random();
-        while (System.currentTimeMillis() - startTime < 100L) {
+        while (System.currentTimeMillis() - startTime < 150L) {
             random.nextInt(Integer.MAX_VALUE);
         }
     }
@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
     private void doLightWork() {
         long startTime = System.currentTimeMillis();
         Random random = new Random();
-        while (System.currentTimeMillis() - startTime < 1L) {
+        while (System.currentTimeMillis() - startTime < 3L) {
             random.nextInt(Integer.MAX_VALUE);
         }
     }

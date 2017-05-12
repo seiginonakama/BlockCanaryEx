@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2017 lqcandqq13 (https://github.com/lqcandqq13).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.letv.sarrsdesktop.blockcanaryex.jrt.internal;
 
 import android.os.Build;
@@ -5,12 +20,12 @@ import android.os.Trace;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
 
 /**
+ * only called on main thread
+ *
  * author: zhoulei date: 2017/5/3.
  */
 class ViewPerformanceSampler {
@@ -19,7 +34,7 @@ class ViewPerformanceSampler {
     private static boolean installed = false;
 
     private static final Stack<TracePoint> TRACE_POINTS = new Stack<>();
-    private static final List<ViewPerformanceInfo> VIEW_PERFORMANCE_INFOS = new LinkedList<>();
+    private static final List<ViewPerformanceInfo> VIEW_PERFORMANCE_INFOS = new ArrayList<>();
 
     static void install() {
         if (!installed) {
@@ -85,33 +100,15 @@ class ViewPerformanceSampler {
         }
     }
 
-    static List<ViewPerformanceInfo> popPerformanceInfoBetween(long startTimeMs, long endTimeMs) {
-        List<ViewPerformanceInfo> result = new ArrayList<>();
-        synchronized (VIEW_PERFORMANCE_INFOS) {
-            for (ViewPerformanceInfo info : VIEW_PERFORMANCE_INFOS) {
-                if (info.getStartTimeMs() >= startTimeMs && info.getEndTimeMs() <= endTimeMs) {
-                    result.add(info);
-                }
-            }
-            VIEW_PERFORMANCE_INFOS.clear();
-        }
-        return result;
+    static List<ViewPerformanceInfo> popPerformanceInfos() {
+        List<ViewPerformanceInfo> infos = new ArrayList<>(VIEW_PERFORMANCE_INFOS.size());
+        infos.addAll(VIEW_PERFORMANCE_INFOS);
+        clearPerformanceInfo();
+        return infos;
     }
 
-    static void clearPerformanceInfoBefore(long time) {
-        synchronized (VIEW_PERFORMANCE_INFOS) {
-            if (!VIEW_PERFORMANCE_INFOS.isEmpty()) {
-                Iterator<ViewPerformanceInfo> iterator = VIEW_PERFORMANCE_INFOS.iterator();
-                while (iterator.hasNext()) {
-                    ViewPerformanceInfo viewPerformanceInfo = iterator.next();
-                    if (viewPerformanceInfo.getStartTimeMs() < time) {
-                        iterator.remove();
-                    } else {
-                        break;
-                    }
-                }
-            }
-        }
+    static void clearPerformanceInfo() {
+        VIEW_PERFORMANCE_INFOS.clear();
     }
 
     private static class TracePoint {

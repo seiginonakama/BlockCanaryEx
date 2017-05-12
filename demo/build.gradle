@@ -18,6 +18,9 @@ block {
 }
 
 android {
+    android {
+        useLibrary 'org.apache.http.legacy'
+    }
     compileSdkVersion 25
     buildToolsVersion "25.0.2"
 
@@ -37,8 +40,8 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile project(':BlockCanaryExJRT')
-//    debugCompile 'com.letv.sarrsdesktop:BlockCanaryExJRT:0.9.8.1'
-//    releaseCompile 'com.letv.sarrsdesktop:BlockCanaryExJRTNoOp:0.9.8.1'
-//    testCompile 'com.letv.sarrsdesktop:BlockCanaryExJRTNoOp:0.9.8.1'
+//    debugCompile 'com.letv.sarrsdesktop:BlockCanaryExJRT:0.9.8.2'
+//    releaseCompile 'com.letv.sarrsdesktop:BlockCanaryExJRTNoOp:0.9.8.2'
+//    testCompile 'com.letv.sarrsdesktop:BlockCanaryExJRTNoOp:0.9.8.2'
     compile 'com.android.support:appcompat-v7:25.1.0'
 }

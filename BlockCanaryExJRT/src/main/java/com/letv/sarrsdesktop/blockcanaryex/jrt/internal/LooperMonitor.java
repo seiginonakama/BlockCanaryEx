@@ -21,6 +21,8 @@ import com.letv.sarrsdesktop.blockcanaryex.jrt.Config;
 import android.os.SystemClock;
 import android.util.Printer;
 
+import java.util.List;
+
 class LooperMonitor implements Printer {
     private long mStartTimestamp = 0;
     private long mStartThreadTimestamp = 0;
@@ -40,14 +42,15 @@ class LooperMonitor implements Printer {
 
     //running on SamplerReportThread
     interface BlockListener {
-        void beforeFirstStart(long firstStartTime, long firstStartThreadTime);
+        void beforeFirstStart(long firstStartTime, long firstStartThreadTime, String creatingActivity);
 
         void onStart(long startTime);
 
         void onBlockEvent(long realStartTime,
                           long realTimeEnd,
                           long threadTimeStart,
-                          long threadTimeEnd);
+                          long threadTimeEnd,
+                          List<ViewPerformanceInfo> viewPerformanceInfos);
 
         void onNoBlock();
     }
@@ -73,17 +76,20 @@ class LooperMonitor implements Printer {
             mFirstStart = false;
             final long currentTime = System.currentTimeMillis();
             final long currentThreadTime = SystemClock.currentThreadTimeMillis();
+            final String creatingActivity = currentCreatingActivity;
             SamplerReportHandler.getInstance().post(new Runnable() {
                 @Override
                 public void run() {
-                    notifyBeforeFirstStart(currentTime, currentThreadTime);
+                    notifyBeforeFirstStart(currentTime, currentThreadTime, creatingActivity);
                 }
             });
+            ViewPerformanceSampler.install();
         }
 
         if(!mPrintingStarted) {
             mPrintingStarted = true;
             currentCreatingActivity = null;
+            ViewPerformanceSampler.clearPerformanceInfo();
             mStartTimestamp = System.currentTimeMillis();
             mStartThreadTimestamp = SystemClock.currentThreadTimeMillis();
             final long startTime = mStartThreadTimestamp;
@@ -103,12 +109,13 @@ class LooperMonitor implements Printer {
             final long endTime = System.currentTimeMillis();
             final long startThreadTime = mStartThreadTimestamp;
             final long endThreadTime = SystemClock.currentThreadTimeMillis();
+            final List<ViewPerformanceInfo> viewPerformanceInfos = ViewPerformanceSampler.popPerformanceInfos();
             if(config.isBlock(startTime, endTime, startThreadTime, endThreadTime,
                     currentCreatingActivity, false)) {
                 SamplerReportHandler.getInstance().post(new Runnable() {
                     @Override
                     public void run() {
-                        notifyBlockEvent(startTime, endTime, startThreadTime, endThreadTime);
+                        notifyBlockEvent(startTime, endTime, startThreadTime, endThreadTime, viewPerformanceInfos);
                     }
                 });
             } else {
@@ -118,16 +125,17 @@ class LooperMonitor implements Printer {
         }
     }
 
-    private void notifyBeforeFirstStart(long currentTime, long currentThreadTime) {
-        mBlockListener.beforeFirstStart(currentTime, currentThreadTime);
+    private void notifyBeforeFirstStart(long currentTime, long currentThreadTime, String creatingActivity) {
+        mBlockListener.beforeFirstStart(currentTime, currentThreadTime, creatingActivity);
     }
 
     private void notifyStart(long startTime) {
         mBlockListener.onStart(startTime);
     }
 
-    private void notifyBlockEvent(long startTime, long endTime, long startThreadTime, final long endThreadTime) {
-        mBlockListener.onBlockEvent(startTime, endTime, startThreadTime, endThreadTime);
+    private void notifyBlockEvent(long startTime, long endTime, long startThreadTime, final long endThreadTime,
+                                  List<ViewPerformanceInfo> viewPerformanceInfos) {
+        mBlockListener.onBlockEvent(startTime, endTime, startThreadTime, endThreadTime, viewPerformanceInfos);
     }
 
     private void notifyNoBlock() {

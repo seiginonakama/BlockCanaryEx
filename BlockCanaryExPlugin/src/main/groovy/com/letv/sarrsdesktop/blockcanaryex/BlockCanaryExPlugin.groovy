@@ -22,6 +22,7 @@ import com.android.build.gradle.internal.api.ApplicationVariantImpl
 import org.apache.commons.io.FileUtils
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.internal.hash.HashUtil
 /**
  * author: zhoulei date: 2017/2/28.
@@ -103,6 +104,9 @@ public class BlockCanaryExPlugin implements Plugin<Project> {
                 List<File> processFileList = new ArrayList<>();
                 Set<File> classPath = new HashSet<>()
                 ApplicationVariantImpl applicationVariant = project.android.applicationVariants.getAt(0);
+                JavaCompile javaCompile = applicationVariant.javaCompile;
+                classPath.addAll(javaCompile.classpath.files)
+
                 for (TransformInput transformInput : transformInputs) {
                     Collection<JarInput> jarInputs = transformInput.getJarInputs();
                     for (JarInput jarInput : jarInputs) {
