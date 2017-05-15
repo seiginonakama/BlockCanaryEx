@@ -22,7 +22,6 @@ import com.android.build.gradle.api.ApplicationVariant
 import com.android.build.gradle.api.BaseVariant
 import com.android.build.gradle.api.LibraryVariant
 import com.android.build.gradle.internal.variant.BaseVariantData
-import com.android.builder.model.AndroidLibrary
 import org.apache.commons.io.FileUtils
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -254,22 +253,54 @@ public class BlockCanaryExPlugin implements Plugin<Project> {
         }
 
         if (baseVariantData != null) {
-            List<AndroidLibrary> androidLibraries = baseVariantData.variantDependency.getCompileDependencies().androidDependencies
-            for (AndroidLibrary library : androidLibraries) {
-                String projectName = library.getProject()
-                if (projectName != null) {
-                    Set<Project> allProject = project.getRootProject().allprojects
-                    for (Project p : allProject) {
-                        if (p == project) {
-                            continue
-                        }
-                        if (":" + p.name == projectName) {
-                            obtainProjectClassPath(p, classPath)
-                            break
-                        }
+            def dependencyContainer = baseVariantData.variantDependency.getCompileDependencies()
+            List<String> projectPathList = getDependencyProjectPath(dependencyContainer)
+            for(String projectPath : projectPathList) {
+                for (Project p : project.rootProject.allprojects) {
+                    if(p == project) {
+                        continue
+                    }
+                    if(":" + p.name == projectPath) {
+                        obtainProjectClassPath(p, classPath)
+                        break
                     }
                 }
             }
         }
+    }
+
+    static List<String> getDependencyProjectPath(def dependencyContainer) {
+        List<String> projectPathList = []
+        if(isDependencyLevel2(dependencyContainer)) {
+            def androidDependencies = dependencyContainer.getAllAndroidDependencies()
+            for(def denpendency : androidDependencies) {
+                String path = denpendency.getProjectPath()
+                if(path != null) {
+                    projectPathList.add(path)
+                }
+            }
+        } else {
+            def androidLibraries = dependencyContainer.getAndroidDependencies()
+            for (def library : androidLibraries) {
+                String projectName = library.getProject()
+                if(projectName != null) {
+                    projectPathList.add(":" + projectName)
+                }
+            }
+        }
+        return projectPathList
+    }
+
+    static boolean isDependencyLevel2(def dependencyContainer) {
+        Class cls = null
+        try {
+            cls = Class.forName("com.android.builder.dependency.level2.DependencyContainer")
+        } catch (ClassNotFoundException e) {
+            //ignored
+        }
+        if(cls != null) {
+            return cls.isAssignableFrom(dependencyContainer.class)
+        }
+        return false;
     }
 }
