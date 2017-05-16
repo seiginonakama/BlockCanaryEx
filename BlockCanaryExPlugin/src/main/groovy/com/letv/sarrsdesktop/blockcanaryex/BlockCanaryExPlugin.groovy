@@ -100,7 +100,8 @@ public class BlockCanaryExPlugin implements Plugin<Project> {
             @Override
             public void transform(TransformInvocation transformInvocation) throws TransformException, InterruptedException, IOException {
                 boolean enable = true;
-                if(hasLib && !block.releaseEnabled) {
+
+                if (hasLib && !block.releaseEnabled) {
                     //library only has release status
                     println("BlockCanaryEx only enable when library project releaseEnabled = true")
                     enable = false;
@@ -113,7 +114,7 @@ public class BlockCanaryExPlugin implements Plugin<Project> {
                     }
                 }
 
-                if(!enable) {
+                if (!enable) {
                     mCareScopes.clear()
                 } else {
                     setFilter(block)
@@ -255,12 +256,12 @@ public class BlockCanaryExPlugin implements Plugin<Project> {
         if (baseVariantData != null) {
             def dependencyContainer = baseVariantData.variantDependency.getCompileDependencies()
             List<String> projectPathList = getDependencyProjectPath(dependencyContainer)
-            for(String projectPath : projectPathList) {
+            for (String projectPath : projectPathList) {
                 for (Project p : project.rootProject.allprojects) {
-                    if(p == project) {
+                    if (p == project) {
                         continue
                     }
-                    if(":" + p.name == projectPath) {
+                    if (":" + p.name == projectPath) {
                         obtainProjectClassPath(p, classPath)
                         break
                     }
@@ -271,11 +272,11 @@ public class BlockCanaryExPlugin implements Plugin<Project> {
 
     static List<String> getDependencyProjectPath(def dependencyContainer) {
         List<String> projectPathList = []
-        if(isDependencyLevel2(dependencyContainer)) {
+        if (isDependencyLevel2(dependencyContainer)) {
             def androidDependencies = dependencyContainer.getAllAndroidDependencies()
-            for(def denpendency : androidDependencies) {
+            for (def denpendency : androidDependencies) {
                 String path = denpendency.getProjectPath()
-                if(path != null) {
+                if (path != null) {
                     projectPathList.add(path)
                 }
             }
@@ -283,8 +284,8 @@ public class BlockCanaryExPlugin implements Plugin<Project> {
             def androidLibraries = dependencyContainer.getAndroidDependencies()
             for (def library : androidLibraries) {
                 String projectName = library.getProject()
-                if(projectName != null) {
-                    projectPathList.add(":" + projectName)
+                if (projectName != null) {
+                    projectPathList.add(projectName)
                 }
             }
         }
@@ -298,7 +299,7 @@ public class BlockCanaryExPlugin implements Plugin<Project> {
         } catch (ClassNotFoundException e) {
             //ignored
         }
-        if(cls != null) {
+        if (cls != null) {
             return cls.isAssignableFrom(dependencyContainer.class)
         }
         return false;
