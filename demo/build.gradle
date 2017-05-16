@@ -10,10 +10,10 @@ block {
 
     scope {
         project true //inject MethodSampler for app project, default true
-        projectLocalDep false //inject MethodSampler for app libs(eg: .jar), default false
+        projectLocalDep true //inject MethodSampler for app libs(eg: .jar), default false
         subProject true //inject MethodSampler for subProject of app project, default true
-        subProjectLocalDep false //inject MethodSampler for subProject libs, default false
-        externalLibraries false //inject MethodSampler external libs, default false
+        subProjectLocalDep true //inject MethodSampler for subProject libs, default false
+        externalLibraries true //inject MethodSampler external libs, default false
     }
 }
 

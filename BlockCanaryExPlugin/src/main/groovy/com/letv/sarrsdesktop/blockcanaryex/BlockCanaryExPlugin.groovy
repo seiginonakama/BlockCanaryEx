@@ -57,6 +57,10 @@ public class BlockCanaryExPlugin implements Plugin<Project> {
 
     private List<String> mIncludePackages = [];
 
+    private File mBuildDir;
+    private File mConfigFile;
+    private File mJarCacheDir;
+
     @Override
     void apply(Project project) {
         def hasApp = project.plugins.withType(AppPlugin)
@@ -72,6 +76,10 @@ public class BlockCanaryExPlugin implements Plugin<Project> {
             SCOPES.remove(QualifiedContent.Scope.SUB_PROJECTS_LOCAL_DEPS)
             SCOPES.remove(QualifiedContent.Scope.EXTERNAL_LIBRARIES)
         }
+
+        mBuildDir = new File(project.getBuildDir(), "BlockCanaryEx")
+        mConfigFile = new File(mBuildDir, "config.properties")
+        mJarCacheDir = new File(mBuildDir, "jar-cache")
 
         project.extensions.create("block", BlockCanaryExExtension)
 
@@ -94,12 +102,13 @@ public class BlockCanaryExPlugin implements Plugin<Project> {
 
             @Override
             boolean isIncremental() {
-                return false;
+                return true;
             }
 
             @Override
             public void transform(TransformInvocation transformInvocation) throws TransformException, InterruptedException, IOException {
                 boolean enable = true;
+                boolean isIncremental = transformInvocation.isIncremental()
 
                 if (hasLib && !block.releaseEnabled) {
                     //library only has release status
@@ -124,7 +133,6 @@ public class BlockCanaryExPlugin implements Plugin<Project> {
                 cleanTransformsDir(project)
 
                 Collection<TransformInput> transformInputs = transformInvocation.getInputs();
-                List<File> processFileList = new ArrayList<>();
                 Set<File> classPath = new HashSet<>()
 
                 obtainProjectClassPath(project, classPath)
@@ -137,38 +145,69 @@ public class BlockCanaryExPlugin implements Plugin<Project> {
                 }
 
                 for (TransformInput transformInput : transformInputs) {
-                    Collection<JarInput> jarInputs = transformInput.getJarInputs();
-                    for (JarInput jarInput : jarInputs) {
+                    for (JarInput jarInput : transformInput.getJarInputs()) {
                         classPath.add(jarInput.getFile())
-                        String name = HashUtil.createHash(jarInput.getFile(), "MD5").asHexString()
+                    }
+
+                    for (DirectoryInput directoryInput : transformInput.getDirectoryInputs()) {
+                        classPath.add(directoryInput.getFile())
+                    }
+                }
+
+                classPath.addAll(baseVariant.androidBuilder.computeFullBootClasspath())
+
+                SamplerInjecter.setClassPath(classPath);
+
+                for (TransformInput transformInput : transformInputs) {
+                    for (JarInput jarInput : transformInput.getJarInputs()) {
+                        File input = jarInput.getFile();
+                        File tmpFile = null;
+                        String name = HashUtil.createHash(input, "MD5").asHexString()
+                        if (mCareScopes.containsAll(jarInput.getScopes())) {
+                            File cache = findCachedJar(name)
+                            if(cache != null) {
+                                input = cache
+                            } else {
+                                File tmpDir = transformInvocation.context.temporaryDir;
+                                if(!tmpDir.isDirectory()) {
+                                    if(tmpDir.exists()) {
+                                        tmpDir.delete();
+                                    }
+                                }
+                                tmpDir.mkdirs()
+                                tmpFile = new File(tmpDir, name + ".jar")
+                                FileUtils.copyFile(input, tmpFile)
+                                input = tmpFile
+                                injectSampler(input)
+                                cacheProcessedJar(input, name)
+                            }
+                        }
                         File output = transformInvocation.outputProvider.getContentLocation(
                                 name, jarInput.getContentTypes(),
                                 jarInput.getScopes(), Format.JAR);
-                        if (mCareScopes.containsAll(jarInput.getScopes())) {
-                            processFileList.add(output);
+                        FileUtils.copyFile(input, output);
+                        if(tmpFile != null) {
+                            tmpFile.delete()
                         }
-                        FileUtils.copyFile(jarInput.getFile(), output);
                     }
 
-                    Collection<DirectoryInput> directoryInputs = transformInput.getDirectoryInputs();
-                    for (DirectoryInput directoryInput : directoryInputs) {
-                        classPath.add(directoryInput.getFile())
+                    for (DirectoryInput directoryInput : transformInput.getDirectoryInputs()) {
                         File output = transformInvocation.outputProvider.getContentLocation(
                                 directoryInput.getName(), directoryInput.getContentTypes(),
                                 directoryInput.getScopes(), Format.DIRECTORY);
                         if (mCareScopes.containsAll(directoryInput.getScopes())) {
-                            processFileList.add(output);
+                            if(isIncremental) {
+                                for(Map.Entry<File, Status> entry : directoryInput.changedFiles) {
+                                    if(entry.value == Status.ADDED || entry.value == Status.CHANGED) {
+                                        injectSampler(entry.key)
+                                    }
+                                }
+                            } else {
+                                injectSampler(directoryInput.file)
+                            }
                         }
                         FileUtils.copyDirectory(directoryInput.getFile(), output);
                     }
-                }
-                classPath.addAll(baseVariant.androidBuilder.computeFullBootClasspath())
-                SamplerInjecter.setClassPath(classPath);
-                for (File processFile : processFileList) {
-                    SamplerInjecter.processClassPath(processFile,
-                            IncludeUtils.fomartPath(mIncludePackages),
-                            IncludeUtils.fomartPath(mExcludePackages),
-                            IncludeUtils.fomartPath(mExcludeClasses));
                 }
             }
         });
@@ -176,6 +215,42 @@ public class BlockCanaryExPlugin implements Plugin<Project> {
         project.afterEvaluate({
             handleConfigChanged(project, block)
         })
+    }
+
+    File findCachedJar(String md5) {
+        if(!mJarCacheDir.isDirectory()) {
+            if(mJarCacheDir.exists()) {
+                mJarCacheDir.delete()
+            }
+            return null;
+        }
+        String target = md5 + ".jar"
+        String[] files = mJarCacheDir.list()
+        for(String name : files) {
+            if(target == name) {
+                return new File(mJarCacheDir, target)
+            }
+        }
+        return null
+    }
+
+    void cacheProcessedJar(File jar, String md5) {
+        if(!mJarCacheDir.isDirectory()) {
+            if(mJarCacheDir.exists()) {
+                mJarCacheDir.delete()
+            }
+        }
+        if(!mJarCacheDir.exists()) {
+            mJarCacheDir.mkdirs()
+        }
+        FileUtils.copyFile(jar, new File(mJarCacheDir, md5 + ".jar"))
+    }
+
+    void injectSampler(File path) {
+        SamplerInjecter.processClassPath(path,
+                IncludeUtils.fomartPath(mIncludePackages),
+                IncludeUtils.fomartPath(mExcludePackages),
+                IncludeUtils.fomartPath(mExcludeClasses));
     }
 
     static boolean isDebug(TransformInvocation transformInvocation) {
@@ -209,23 +284,22 @@ public class BlockCanaryExPlugin implements Plugin<Project> {
         mExcludeClasses.addAll(block.excludePackages)
     }
 
-    static void handleConfigChanged(Project project, BlockCanaryExExtension block) {
-        File preConfigFile = new File(project.getBuildDir().absolutePath + "${I}BlockCanaryEx${I}config.properties");
+    void handleConfigChanged(Project project, BlockCanaryExExtension block) {
         String nowHash = block.generateHash()
         Properties properties = new Properties()
-        if (!preConfigFile.exists()) {
+        if (!mConfigFile.exists()) {
             cleanTransformsDir(project)
         } else {
-            properties.load(preConfigFile.newDataInputStream())
+            properties.load(mConfigFile.newDataInputStream())
             String preHash = properties.getProperty("hash")
             if (!nowHash.equals(preHash)) {
                 cleanTransformsDir(project)
             }
         }
-        preConfigFile.delete()
-        FileUtils.touch(preConfigFile)
+        mConfigFile.delete()
+        FileUtils.touch(mConfigFile)
         properties.put("hash", nowHash)
-        properties.store(preConfigFile.newDataOutputStream(), "")
+        properties.store(mConfigFile.newDataOutputStream(), "")
     }
 
     static void cleanTransformsDir(Project project) {
