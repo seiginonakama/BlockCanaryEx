@@ -1,6 +1,7 @@
 package com.letv.sarrsdesktop.blockcanaryex
 
 import javassist.*
+import javassist.bytecode.ClassFile
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.IOUtils
 
@@ -155,15 +156,16 @@ class SamplerInjecter {
             String suffix = clazzName.subSequence(index$ + 1, clazzName.length())
             if(Character.isDigit(suffix.charAt(0))) {
                 String parentSimpleName;
-                if(clazz.getSuperclass().name == "java.lang.Object") {
-                    CtClass[] ctClasses = clazz.getInterfaces();
-                    if(ctClasses != null && ctClasses.length > 0) {
-                        parentSimpleName = ctClasses[0].simpleName;
+                ClassFile classFile = clazz.getClassFile2()
+                if(classFile.getSuperclass() == "java.lang.Object") {
+                    String[] interfaces = classFile.getInterfaces();
+                    if(interfaces != null && interfaces.length > 0) {
+                        parentSimpleName = interfaces[0];
                     } else {
                         parentSimpleName = Object.class.simpleName;
                     }
                 } else {
-                    parentSimpleName = clazz.getSuperclass().simpleName;
+                    parentSimpleName = classFile.getSuperclass();
                 }
                 return clazzName + "\$" + parentSimpleName;
             } else {

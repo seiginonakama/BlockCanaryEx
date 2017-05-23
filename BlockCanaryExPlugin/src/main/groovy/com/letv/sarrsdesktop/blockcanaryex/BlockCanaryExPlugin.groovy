@@ -18,9 +18,11 @@ package com.letv.sarrsdesktop.blockcanaryex
 import com.android.build.api.transform.QualifiedContent
 import com.android.build.gradle.AppPlugin
 import com.android.build.gradle.LibraryPlugin
+import com.android.builder.Version
 import org.apache.commons.io.FileUtils
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.internal.artifacts.ivyservice.ivyresolve.strategy.DefaultVersionComparator
 
 /**
  * author: zhoulei date: 2017/2/28.
@@ -35,6 +37,12 @@ public class BlockCanaryExPlugin implements Plugin<Project> {
         SCOPES.add(QualifiedContent.Scope.EXTERNAL_LIBRARIES);
     }
 
+    static final boolean ABOVE_ANDROID_GRADLE_PLUGIN_3;
+    static {
+        Comparator<String> versionComparator = new DefaultVersionComparator().asStringComparator();
+        ABOVE_ANDROID_GRADLE_PLUGIN_3 = versionComparator.compare(Version.ANDROID_GRADLE_PLUGIN_VERSION, "3.0.0-alpha1") >= 0
+    }
+
     private File mBuildDir;
     private File mConfigFile;
 
@@ -45,6 +53,12 @@ public class BlockCanaryExPlugin implements Plugin<Project> {
 
         if (!hasApp && !hasLib) {
             throw new IllegalStateException("'android' or 'android-library' plugin required.")
+        }
+
+        if (ABOVE_ANDROID_GRADLE_PLUGIN_3) {
+            //PROJECT_LOCAL_DEPS, SUB_PROJECTS_LOCAL_DEPS deprecated, replaced by EXTERNAL_LIBRARIES
+            SCOPES.remove(QualifiedContent.Scope.PROJECT_LOCAL_DEPS)
+            SCOPES.remove(QualifiedContent.Scope.SUB_PROJECTS_LOCAL_DEPS)
         }
 
         if (hasLib) {
@@ -65,6 +79,16 @@ public class BlockCanaryExPlugin implements Plugin<Project> {
 
         project.afterEvaluate({
             handleConfigChanged(project, block)
+
+            if (ABOVE_ANDROID_GRADLE_PLUGIN_3) {
+                if (block.scope.projectLocalDep
+                        || block.scope.subProjectLocalDep) {
+                    //PROJECT_LOCAL_DEPS, SUB_PROJECTS_LOCAL_DEPS deprecated, replaced by EXTERNAL_LIBRARIES
+                    block.scope.externalLibraries = true;
+                }
+                block.scope.projectLocalDep = false;
+                block.scope.subProjectLocalDep = false;
+            }
         })
     }
 

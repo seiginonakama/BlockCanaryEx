@@ -1,5 +1,7 @@
 package com.letv.sarrsdesktop.blockcanaryex.demo;
 
+import com.letv.sarrsdesktop.blockcanaryex.demo.library.TestUtil;
+
 import android.app.ActivityManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -40,6 +42,8 @@ public class MainActivity extends AppCompatActivity {
                         getViewBlockTime(drawBlockInput.getText().toString()));
             }
         });
+
+        TestUtil.testProvide();
     }
 
     private void doGc() {
