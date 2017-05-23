@@ -1,21 +1,21 @@
 apply plugin: 'com.android.library'
-//apply plugin: 'blockcanaryex'
-//
-//block {
-//    //library project only has release status
-//    releaseEnabled true //enable MethodSampler when release mode, default false
-//    excludePackages = ['com.android', 'android.support'] //exclude the package you don't want to inject MethodSampler, eg: ['com.android', 'android.support']
-//    excludeClasses = [] //exclude the class you don't want to inject MethodSampler
-//    includePackages = [] //only include the package you want to inject MethodSampler, packages which don't included will not be injected
-//
-//    scope {
-//        project true //inject MethodSampler for app project, default true
-//        projectLocalDep false //inject MethodSampler for app libs(eg: .jar), default false
-//        subProject true //inject MethodSampler for subProject of app project, default true
-//        subProjectLocalDep false //inject MethodSampler for subProject libs, default false
-//        externalLibraries false //inject MethodSampler external libs, default false
-//    }
-//}
+apply plugin: 'blockcanaryex'
+
+block {
+    //library project only has release status
+    releaseEnabled true //enable MethodSampler when release mode, default false
+    excludePackages = ['com.android', 'android.support'] //exclude the package you don't want to inject MethodSampler, eg: ['com.android', 'android.support']
+    excludeClasses = [] //exclude the class you don't want to inject MethodSampler
+    includePackages = [] //only include the package you want to inject MethodSampler, packages which don't included will not be injected
+
+    scope {
+        project true //inject MethodSampler for app project, default true
+        projectLocalDep false //inject MethodSampler for app libs(eg: .jar), default false
+        subProject true //inject MethodSampler for subProject of app project, default true
+        subProjectLocalDep false //inject MethodSampler for subProject libs, default false
+        externalLibraries false //inject MethodSampler external libs, default false
+    }
+}
 
 android {
     compileSdkVersion 25
