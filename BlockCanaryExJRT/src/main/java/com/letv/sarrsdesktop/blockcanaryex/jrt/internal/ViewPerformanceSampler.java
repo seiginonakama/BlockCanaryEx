@@ -20,12 +20,13 @@ import android.os.Trace;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
 
 /**
  * only called on main thread
- *
+ * <p>
  * author: zhoulei date: 2017/5/3.
  */
 class ViewPerformanceSampler {
@@ -55,7 +56,7 @@ class ViewPerformanceSampler {
 
     public static void traceBegin(long traceTag, String methodName) {
         if (traceTag == TRACE_TAG_VIEW) {
-            TRACE_POINTS.push(TracePoint.makePoint(methodName));
+            TRACE_POINTS.push(TracePoint.obtain(methodName, System.currentTimeMillis()));
         }
     }
 
@@ -64,63 +65,86 @@ class ViewPerformanceSampler {
             if (!TRACE_POINTS.isEmpty()) {
                 long endTime = System.currentTimeMillis();
                 TracePoint tracePoint = TRACE_POINTS.pop();
-                ViewPerformanceInfo info = null;
+                int type = ViewPerformanceInfo.TYPE_UNKNOWN;
                 switch (tracePoint.mMethodName) {
                     case "input":
-                        info = new ViewPerformanceInfo(ViewPerformanceInfo.TYPE_INPUT,
-                                tracePoint.mStartTime, endTime);
+                        type = ViewPerformanceInfo.TYPE_INPUT;
                         break;
                     case "animation":
-                        info = new ViewPerformanceInfo(ViewPerformanceInfo.TYPE_ANIMATION,
-                                tracePoint.mStartTime, endTime);
+                        type = ViewPerformanceInfo.TYPE_ANIMATION;
                         break;
                     case "measure":
-                        info = new ViewPerformanceInfo(ViewPerformanceInfo.TYPE_MEASURE,
-                                tracePoint.mStartTime, endTime);
+                        type = ViewPerformanceInfo.TYPE_MEASURE;
                         break;
                     case "layout":
-                        info = new ViewPerformanceInfo(ViewPerformanceInfo.TYPE_LAYOUT,
-                                tracePoint.mStartTime, endTime);
+                        type = ViewPerformanceInfo.TYPE_LAYOUT;
                         break;
                     case "draw":
-                        info = new ViewPerformanceInfo(ViewPerformanceInfo.TYPE_DRAW,
-                                tracePoint.mStartTime, endTime);
+                        type = ViewPerformanceInfo.TYPE_DRAW;
                         break;
                     case "commit":
-                        info = new ViewPerformanceInfo(ViewPerformanceInfo.TYPE_COMMIT,
-                                tracePoint.mStartTime, endTime);
+                        type = ViewPerformanceInfo.TYPE_COMMIT;
                         break;
                 }
-                if (info != null) {
+
+                if(type != ViewPerformanceInfo.TYPE_UNKNOWN) {
+                    ViewPerformanceInfo info = new ViewPerformanceInfo();
+                    info.setType(type);
+                    info.setStartTimeMs(tracePoint.mStartTime);
+                    info.setEndTimeMs(endTime);
                     synchronized (VIEW_PERFORMANCE_INFOS) {
                         VIEW_PERFORMANCE_INFOS.add(info);
                     }
                 }
+
+                tracePoint.recycle();
             }
         }
     }
 
     static List<ViewPerformanceInfo> popPerformanceInfos() {
-        List<ViewPerformanceInfo> infos = new ArrayList<>(VIEW_PERFORMANCE_INFOS.size());
-        infos.addAll(VIEW_PERFORMANCE_INFOS);
+        List<ViewPerformanceInfo> infos;
+        synchronized (VIEW_PERFORMANCE_INFOS) {
+            infos = new ArrayList<>(VIEW_PERFORMANCE_INFOS.size());
+            infos.addAll(VIEW_PERFORMANCE_INFOS);
+        }
         clearPerformanceInfo();
         return infos;
     }
 
     static void clearPerformanceInfo() {
-        VIEW_PERFORMANCE_INFOS.clear();
+        synchronized (VIEW_PERFORMANCE_INFOS) {
+            VIEW_PERFORMANCE_INFOS.clear();
+        }
     }
 
     private static class TracePoint {
-        private String mMethodName;
-        private long mStartTime;
+        private static final List<TracePoint> sPool = new LinkedList<>();
 
-        static TracePoint makePoint(String methodName) {
-            long currentTime = System.currentTimeMillis();
-            TracePoint tracePoint = new TracePoint();
+        String mMethodName;
+        long mStartTime;
+
+        static TracePoint obtain(String methodName, long startTime) {
+            TracePoint tracePoint;
+            synchronized (sPool) {
+                if (sPool.isEmpty()) {
+                    tracePoint = new TracePoint();
+                } else {
+                    tracePoint = sPool.remove(0);
+                }
+            }
+
             tracePoint.mMethodName = methodName;
-            tracePoint.mStartTime = currentTime;
+            tracePoint.mStartTime = startTime;
             return tracePoint;
+        }
+
+        void recycle() {
+            mMethodName = null;
+            mStartTime = 0L;
+            synchronized (sPool) {
+                sPool.add(this);
+            }
         }
     }
 }

@@ -56,6 +56,8 @@ public class BlockMonitor {
     private static final long INSTALLED_TIME = System.currentTimeMillis();
     private static final long INSTALLED_THREAD_TIME = SystemClock.currentThreadTimeMillis();
 
+    private static ObjArrayPool<MethodInfo> sMethodInfoPool;
+
     private static final LooperMonitor.BlockListener BLOCK_LISTENER = new LooperMonitor.BlockListener() {
         @Override
         public void beforeFirstStart(long firstStartTime, long firstStartThreadTime, String creatingActivity) {
@@ -84,8 +86,8 @@ public class BlockMonitor {
         @Override
         public void onBlockEvent(long realStartTime, long realEndTime, long threadTimeStart, long threadTimeEnd,
                                  List<ViewPerformanceInfo> viewPerformanceInfos) {
-            List<MethodInfo> methodInfoList = MethodInfoPool.getAllUsed();
-            MethodInfoPool.reset();
+            List<MethodInfo> methodInfoList = sMethodInfoPool.getAllUsed();
+            sMethodInfoPool.reset();
 
             String cpuRate = "";
             boolean isBusy = false;
@@ -112,7 +114,7 @@ public class BlockMonitor {
 
         @Override
         public void onNoBlock() {
-            MethodInfoPool.reset();
+            sMethodInfoPool.reset();
         }
     };
 
@@ -120,7 +122,7 @@ public class BlockMonitor {
         @Override
         public void onNewLog(File log) {
             ISamplerService samplerService = getServiceSyncMayNull();
-            if(samplerService != null) {
+            if (samplerService != null) {
                 try {
                     samplerService.notifyNewLog(BlockCanaryEx.getConfig().provideLogPath(), log.getAbsolutePath());
                 } catch (RemoteException e) {
@@ -134,12 +136,12 @@ public class BlockMonitor {
     private static final List<WeakReference<BlockObserver>> sBlockObservers = new ArrayList<>();
 
     private static boolean isBlockCanaryExBlocked(List<MethodInfo> methodInfos) {
-        if(methodInfos == null) {
+        if (methodInfos == null) {
             return false;
         }
         MethodInfo top = null;
-        for(MethodInfo methodInfo : methodInfos) {
-            if(top == null || top.getCostRealTimeMs() < methodInfo.getCostRealTimeMs()) {
+        for (MethodInfo methodInfo : methodInfos) {
+            if (top == null || top.getCostRealTimeMs() < methodInfo.getCostRealTimeMs()) {
                 top = methodInfo;
             }
         }
@@ -164,7 +166,7 @@ public class BlockMonitor {
         SamplerReportHandler.getInstance().post(new Runnable() {
             @Override
             public void run() {
-                MethodInfo methodInfo = MethodInfoPool.obtain();
+                MethodInfo methodInfo = sMethodInfoPool.obtain();
                 methodInfo.setCls(cls);
                 methodInfo.setMethod(method);
                 methodInfo.setParamTypes(paramTypes);
@@ -184,7 +186,8 @@ public class BlockMonitor {
 
     public static void install(Config config) {
         Context context = config.getContext();
-        MethodInfoPool.setMaxBuffer(context.getResources().getInteger(R.integer.block_canary_ex_max_method_info_buffer));
+        sMethodInfoPool = new ObjArrayPool<>(context.getResources().getInteger(R.integer.block_canary_ex_max_method_info_buffer),
+                MethodInfo.class);
         ensureMonitorInstalled();
         connectServiceIfNot();
         LogWriter.registerLogListener(LOG_LISTENER);

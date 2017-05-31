@@ -4,6 +4,8 @@ package com.letv.sarrsdesktop.blockcanaryex.jrt.internal;
  * author: zhoulei date: 2017/5/3.
  */
 public class ViewPerformanceInfo {
+    static final int TYPE_UNKNOWN = -1;
+
     static final int TYPE_INPUT = 0;
     static final int TYPE_ANIMATION = 1;
     static final int TYPE_MEASURE = 2;
@@ -15,10 +17,8 @@ public class ViewPerformanceInfo {
     private long mStartTimeMs;
     private long mEndTimeMs;
 
-    ViewPerformanceInfo(int type, long startTimeMs, long endTimeMs) {
-        mType = type;
-        mStartTimeMs = startTimeMs;
-        mEndTimeMs = endTimeMs;
+    ViewPerformanceInfo() {
+
     }
 
     public int getType() {
@@ -35,6 +35,18 @@ public class ViewPerformanceInfo {
 
     public long getCostTimeMs() {
         return mEndTimeMs - mStartTimeMs;
+    }
+
+    public void setType(int type) {
+        mType = type;
+    }
+
+    public void setStartTimeMs(long startTimeMs) {
+        mStartTimeMs = startTimeMs;
+    }
+
+    public void setEndTimeMs(long endTimeMs) {
+        mEndTimeMs = endTimeMs;
     }
 
     @Override
