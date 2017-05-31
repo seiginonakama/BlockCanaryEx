@@ -61,8 +61,8 @@ public class BlockMonitor {
     private static final LooperMonitor.BlockListener BLOCK_LISTENER = new LooperMonitor.BlockListener() {
         @Override
         public void beforeFirstStart(long firstStartTime, long firstStartThreadTime, String creatingActivity) {
-            if (BlockCanaryEx.getConfig().isBlock(INSTALLED_TIME, firstStartTime, INSTALLED_THREAD_TIME, firstStartThreadTime,
-                    creatingActivity, true)) {
+            if (BlockCanaryEx.getConfig().isBlock(firstStartTime - INSTALLED_TIME, firstStartThreadTime - INSTALLED_THREAD_TIME,
+                    creatingActivity, true, 0L)) {
                 onBlockEvent(INSTALLED_TIME, firstStartTime, INSTALLED_THREAD_TIME, firstStartThreadTime, null);
             }
         }

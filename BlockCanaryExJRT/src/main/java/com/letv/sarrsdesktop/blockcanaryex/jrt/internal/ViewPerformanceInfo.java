@@ -8,10 +8,11 @@ public class ViewPerformanceInfo {
 
     static final int TYPE_INPUT = 0;
     static final int TYPE_ANIMATION = 1;
-    static final int TYPE_MEASURE = 2;
-    static final int TYPE_LAYOUT = 3;
-    static final int TYPE_DRAW = 4;
-    static final int TYPE_COMMIT = 5;
+    static final int TYPE_INFLATE = 2;
+    static final int TYPE_MEASURE = 3;
+    static final int TYPE_LAYOUT = 4;
+    static final int TYPE_DRAW = 5;
+    static final int TYPE_COMMIT = 6;
 
     private int mType;
     private long mStartTimeMs;
@@ -58,6 +59,9 @@ public class ViewPerformanceInfo {
                 break;
             case TYPE_ANIMATION:
                 type = "animation";
+                break;
+            case TYPE_INFLATE:
+                type = "inflate";
                 break;
             case TYPE_MEASURE:
                 type = "measure";

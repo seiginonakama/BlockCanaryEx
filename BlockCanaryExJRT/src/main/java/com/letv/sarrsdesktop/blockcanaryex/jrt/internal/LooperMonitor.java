@@ -21,6 +21,7 @@ import com.letv.sarrsdesktop.blockcanaryex.jrt.Config;
 import android.os.SystemClock;
 import android.util.Printer;
 
+import java.util.Iterator;
 import java.util.List;
 
 class LooperMonitor implements Printer {
@@ -110,8 +111,8 @@ class LooperMonitor implements Printer {
             final long startThreadTime = mStartThreadTimestamp;
             final long endThreadTime = SystemClock.currentThreadTimeMillis();
             final List<ViewPerformanceInfo> viewPerformanceInfos = ViewPerformanceSampler.popPerformanceInfos();
-            if(config.isBlock(startTime, endTime, startThreadTime, endThreadTime,
-                    currentCreatingActivity, false)) {
+            if(config.isBlock(endTime - startTime, endThreadTime - startThreadTime,
+                    currentCreatingActivity, false, computeInflateTimeAndRemoveInflateEvent(viewPerformanceInfos))) {
                 SamplerReportHandler.getInstance().post(new Runnable() {
                     @Override
                     public void run() {
@@ -140,5 +141,21 @@ class LooperMonitor implements Printer {
 
     private void notifyNoBlock() {
         mBlockListener.onNoBlock();
+    }
+
+    private long computeInflateTimeAndRemoveInflateEvent(List<ViewPerformanceInfo> viewPerformanceInfos) {
+        if(viewPerformanceInfos == null || viewPerformanceInfos.isEmpty()) {
+            return 0L;
+        }
+        long inflatingTime = 0L;
+        Iterator<ViewPerformanceInfo> iterator = viewPerformanceInfos.iterator();
+        while (iterator.hasNext()) {
+            ViewPerformanceInfo info = iterator.next();
+            if(info.getType() == ViewPerformanceInfo.TYPE_INFLATE) {
+                inflatingTime += info.getCostTimeMs();
+                iterator.remove();
+            }
+        }
+        return inflatingTime;
     }
 }

@@ -73,6 +73,9 @@ class ViewPerformanceSampler {
                     case "animation":
                         type = ViewPerformanceInfo.TYPE_ANIMATION;
                         break;
+                    case "inflate":
+                        type = ViewPerformanceInfo.TYPE_INFLATE;
+                        break;
                     case "measure":
                         type = ViewPerformanceInfo.TYPE_MEASURE;
                         break;
@@ -87,7 +90,7 @@ class ViewPerformanceSampler {
                         break;
                 }
 
-                if(type != ViewPerformanceInfo.TYPE_UNKNOWN) {
+                if (type != ViewPerformanceInfo.TYPE_UNKNOWN) {
                     ViewPerformanceInfo info = new ViewPerformanceInfo();
                     info.setType(type);
                     info.setStartTimeMs(tracePoint.mStartTime);

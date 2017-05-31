@@ -41,8 +41,8 @@ public class Config implements BlockMonitor.BlockObserver {
         return false;
     }
 
-    public boolean isBlock(long startTime, long endTime, long startThreadTime, long endThreadTime,
-                           String creatingActivity, boolean isApplicationCreating) {
+    public boolean isBlock(long costRealTimeMs, long costThreadTimeMs,
+                           String creatingActivity, boolean isApplicationCreating, long inflateCostTimeMs) {
         return false;
     }
 
