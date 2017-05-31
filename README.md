@@ -36,9 +36,9 @@ apply plugin: 'blockcanaryex'
 ```
 
 ```groovy
-debugCompile 'com.letv.sarrsdesktop:BlockCanaryExJRT:0.9.8.2'
-releaseCompile 'com.letv.sarrsdesktop:BlockCanaryExJRTNoOp:0.9.8.2'
-testCompile 'com.letv.sarrsdesktop:BlockCanaryExJRTNoOp:0.9.8.2'
+debugCompile 'com.letv.sarrsdesktop:BlockCanaryExJRT:0.9.9.0'
+releaseCompile 'com.letv.sarrsdesktop:BlockCanaryExJRTNoOp:0.9.9.0'
+testCompile 'com.letv.sarrsdesktop:BlockCanaryExJRTNoOp:0.9.9.0'
 ```
 
 Basic Usage
@@ -114,20 +114,19 @@ you also can override more Config method to customize BlockCanaryEx runtime
                * judge whether the loop is blocked, you can override this to decide
                * whether it is blocked by your logic
                *
-               * @param startTime in mills
-               * @param endTime in mills
-               * @param startThreadTime in mills
-               * @param endThreadTime in mills
+               * @param costRealTimeMs in mills
+               * @param costThreadTimeMs in mills
                * @param creatingActivity current creatingActivity class name, nullable
                * @param isApplicationCreating is application creating
+               * @param inflateCostTimeMs view inflating time in mills
                * @return true if blocked, else false
                */
-              public boolean isBlock(long startTime, long endTime, long startThreadTime, long endThreadTime,
-                                     String creatingActivity, boolean isApplicationCreating) {
+              public boolean isBlock(long costRealTimeMs, long costThreadTimeMs,
+                                         String creatingActivity, boolean isApplicationCreating, long inflateCostTimeMs) {
                   if(creatingActivity != null || isApplicationCreating) {
-                      return (endTime - startTime) > 250L;
+                      return costRealTimeMs > 250L;
                   } else {
-                      return (endTime - startTime) > 100L && (endThreadTime - startThreadTime) > 8L;
+                      return costRealTimeMs > 100L && costThreadTimeMs > 8L;
                   }
               }
 
