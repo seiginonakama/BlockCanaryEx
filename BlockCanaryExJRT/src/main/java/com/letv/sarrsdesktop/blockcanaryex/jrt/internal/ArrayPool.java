@@ -25,13 +25,13 @@ import java.util.List;
  *
  * author: zhoulei date: 2017/5/31.
  */
-class ObjArrayPool<T> {
+class ArrayPool<T> {
     private Object[] mPool;
     private int mLastIndex = -1;
     private final Constructor<T> mConstructor;
     private final int mMaxBuffer;
 
-    ObjArrayPool(int maxBuffer, Class<T> cls) {
+    ArrayPool(int maxBuffer, Class<T> cls) {
         mMaxBuffer = maxBuffer;
         mPool = new Object[maxBuffer];
         try {

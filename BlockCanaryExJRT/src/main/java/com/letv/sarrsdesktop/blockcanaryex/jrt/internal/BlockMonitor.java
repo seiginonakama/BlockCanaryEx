@@ -56,7 +56,7 @@ public class BlockMonitor {
     private static final long INSTALLED_TIME = System.currentTimeMillis();
     private static final long INSTALLED_THREAD_TIME = SystemClock.currentThreadTimeMillis();
 
-    private static ObjArrayPool<MethodInfo> sMethodInfoPool;
+    private static ArrayPool<MethodInfo> sMethodInfoPool;
 
     private static final LooperMonitor.BlockListener BLOCK_LISTENER = new LooperMonitor.BlockListener() {
         @Override
@@ -186,7 +186,7 @@ public class BlockMonitor {
 
     public static void install(Config config) {
         Context context = config.getContext();
-        sMethodInfoPool = new ObjArrayPool<>(context.getResources().getInteger(R.integer.block_canary_ex_max_method_info_buffer),
+        sMethodInfoPool = new ArrayPool<>(context.getResources().getInteger(R.integer.block_canary_ex_max_method_info_buffer),
                 MethodInfo.class);
         ensureMonitorInstalled();
         connectServiceIfNot();
