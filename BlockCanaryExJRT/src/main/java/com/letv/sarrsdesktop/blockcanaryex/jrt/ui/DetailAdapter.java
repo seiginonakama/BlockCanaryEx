@@ -15,7 +15,6 @@
  */
 package com.letv.sarrsdesktop.blockcanaryex.jrt.ui;
 
-
 import com.letv.sarrsdesktop.blockcanaryex.jrt.BlockInfo;
 import com.letv.sarrsdesktop.blockcanaryex.jrt.R;
 

@@ -17,16 +17,23 @@ package com.letv.sarrsdesktop.blockcanaryex.jrt.ui;
 
 import com.letv.sarrsdesktop.blockcanaryex.jrt.BlockInfo;
 import com.letv.sarrsdesktop.blockcanaryex.jrt.R;
+import com.letv.sarrsdesktop.blockcanaryex.jrt.internal.BlockSamplerService;
+import com.letv.sarrsdesktop.blockcanaryex.jrt.internal.INewLogListener;
+import com.letv.sarrsdesktop.blockcanaryex.jrt.internal.ISamplerService;
 import com.letv.sarrsdesktop.blockcanaryex.jrt.internal.LogWriter;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
+import android.os.RemoteException;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -55,7 +62,7 @@ import static android.view.View.VISIBLE;
 /**
  * Display blocks.
  */
-public class DisplayActivity extends Activity implements LogWriter.LogListener {
+public class DisplayActivity extends Activity {
 
     private static final String TAG = "DisplayActivity";
     private static final String SHOW_BLOCK_EXTRA = "show_latest";
@@ -70,26 +77,58 @@ public class DisplayActivity extends Activity implements LogWriter.LogListener {
     private Button mActionButton;
     private static int sMaxStoreBlockCount;
 
-    @Override
-    public void onNewLog(File log) {
-        try {
-            final BlockInfoEx blockInfoEx = BlockInfoEx.newInstance(log);
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    mBlockInfoEntries.add(0, blockInfoEx);
-                    while (mBlockInfoEntries.size() > sMaxStoreBlockCount) {
-                        mBlockInfoEntries.remove(mBlockInfoEntries.size() - 1);
-                    }
-                    Adapter adapter = mListView.getAdapter();
-                    if (adapter instanceof BlockListAdapter) {
-                        ((BlockListAdapter) adapter).notifyDataSetChanged();
-                    }
+    private ISamplerService mSamplerService = null;
+
+    private final ServiceConnection mServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            synchronized (DisplayActivity.this) {
+                mSamplerService = ISamplerService.Stub.asInterface(service);
+                try {
+                    mSamplerService.registerNewLogListener(mNewLogListener);
+                } catch (RemoteException e) {
+                    e.printStackTrace();
                 }
-            });
-        } catch (Exception e) {
-            Log.e(TAG, "block info parse failed:" + e);
+            }
         }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            synchronized (DisplayActivity.this) {
+                mSamplerService = null;
+            }
+        }
+    };
+
+    private final INewLogListener mNewLogListener = new INewLogListener.Stub() {
+        @Override
+        public void onNewLog(String logPath) throws RemoteException {
+            File file = new File(logPath);
+            if(file.exists() && file.isFile()) {
+                try {
+                    final BlockInfoEx blockInfoEx = BlockInfoEx.newInstance(file);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mBlockInfoEntries.add(0, blockInfoEx);
+                            while (mBlockInfoEntries.size() > sMaxStoreBlockCount) {
+                                mBlockInfoEntries.remove(mBlockInfoEntries.size() - 1);
+                            }
+                            Adapter adapter = mListView.getAdapter();
+                            if (adapter instanceof BlockListAdapter) {
+                                ((BlockListAdapter) adapter).notifyDataSetChanged();
+                            }
+                        }
+                    });
+                } catch (Exception e) {
+                    Log.e(TAG, "block info parse failed:" + e);
+                }
+            }
+        }
+    };
+
+    private synchronized ISamplerService getSamplerService() {
+        return mSamplerService;
     }
 
     @Override
@@ -115,7 +154,8 @@ public class DisplayActivity extends Activity implements LogWriter.LogListener {
 
         updateUi();
 
-        LogWriter.registerLogListener(this);
+        Intent intent = new Intent(this, BlockSamplerService.class);
+        bindService(intent, mServiceConnection, BIND_AUTO_CREATE);
     }
 
     // No, it's not deprecated. Android lies.
@@ -151,6 +191,15 @@ public class DisplayActivity extends Activity implements LogWriter.LogListener {
     protected void onDestroy() {
         super.onDestroy();
         LoadBlocks.forgetActivity();
+        ISamplerService samplerService = getSamplerService();
+        if(samplerService != null) {
+            try {
+                samplerService.unregisterNewLogListener(mNewLogListener);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
+        unbindService(mServiceConnection);
     }
 
     @Override

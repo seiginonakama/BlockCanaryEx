@@ -15,9 +15,7 @@
  */
 package com.letv.sarrsdesktop.blockcanaryex.jrt.internal;
 
-import com.letv.sarrsdesktop.blockcanaryex.jrt.BlockCanaryEx;
 import com.letv.sarrsdesktop.blockcanaryex.jrt.BlockInfo;
-import com.letv.sarrsdesktop.blockcanaryex.jrt.Config;
 
 import android.content.Context;
 import android.os.Environment;
@@ -53,8 +51,7 @@ public class LogWriter {
     private static final BlockMonitor.BlockObserver BLOCK_OBSERVER = new BlockMonitor.BlockObserver() {
         @Override
         public void onBlock(BlockInfo blockInfo) {
-            Config config = BlockCanaryEx.getConfig();
-            if(config != null && config.enableSaveLog()) {
+            if(sEnable) {
                 save(blockInfo);
             }
         }
@@ -62,6 +59,14 @@ public class LogWriter {
 
     static {
         BlockMonitor.registerBlockObserver(BLOCK_OBSERVER);
+    }
+
+    private static File sBlockDirectory = new File(Environment.getExternalStorageDirectory(), "blockcanaryex");
+    private static boolean sEnable = false;
+
+    public static void initIfNotInited(Context context, String logPath, boolean enable) {
+        sBlockDirectory = new File(getPath(context, logPath));
+        sEnable = enable;
     }
 
     public interface LogListener {
@@ -214,17 +219,14 @@ public class LogWriter {
         return path;
     }
 
-    private static String getPath() {
+    private static String getPath(Context context, String logPath) {
         String state = Environment.getExternalStorageState();
-        Config config = BlockCanaryEx.getConfig();
-        String logPath = config
-                == null ? "" : config.provideLogPath();
 
         if (Environment.MEDIA_MOUNTED.equals(state)
                 && Environment.getExternalStorageDirectory().canWrite()) {
             return Environment.getExternalStorageDirectory().getPath() + logPath;
         }
-        Context context = BlockCanaryEx.getConfig().getContext();
+
         File externalFilesDir = context.getExternalFilesDir("BlockCanaryEx");
         if(externalFilesDir != null && externalFilesDir.canWrite()) {
             return externalFilesDir.getAbsolutePath() + logPath;
@@ -233,7 +235,7 @@ public class LogWriter {
     }
 
     private static File detectedBlockDirectory() {
-        File directory = new File(getPath());
+        File directory = sBlockDirectory;
         if (!directory.exists()) {
             directory.mkdirs();
         }

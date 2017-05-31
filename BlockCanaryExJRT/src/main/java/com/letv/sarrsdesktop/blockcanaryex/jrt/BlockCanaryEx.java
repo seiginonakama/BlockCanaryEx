@@ -55,9 +55,10 @@ public class BlockCanaryEx {
             throw new IllegalStateException("BlockCanaryEx installed");
         }
         sConfig = config;
+        LogWriter.initIfNotInited(config.getContext(), config.provideLogPath(), config.enableSaveLog());
+        LogWriter.cleanObsolete();
         BlockMonitor.install(config);
         BlockMonitor.registerBlockObserver(sConfig);
-        LogWriter.cleanObsolete();
         BlockMonitor.registerBlockObserver(DISPLAY_SERVICE);
 
         setEnabled(sConfig.getContext(), DisplayActivity.class, sConfig.displayNotification());

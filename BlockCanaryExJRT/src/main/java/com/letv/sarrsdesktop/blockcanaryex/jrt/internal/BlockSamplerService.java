@@ -18,6 +18,7 @@ package com.letv.sarrsdesktop.blockcanaryex.jrt.internal;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
+import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 
 import java.util.List;
@@ -27,6 +28,7 @@ import java.util.List;
  */
 public class BlockSamplerService extends Service {
     private static final byte[] CPU_SAMPLER_LOCK = new byte[0];
+    private final RemoteCallbackList<INewLogListener> mNewLogListeners = new RemoteCallbackList<>();
 
     private ISamplerService.Stub mSamplerService = new ISamplerService.Stub() {
         @Override
@@ -52,6 +54,28 @@ public class BlockSamplerService extends Service {
         @Override
         public List<GcInfo> popGcInfoBetween(long startTime, long endTime) throws RemoteException {
             return GcSampler.popGcInfoBetween(startTime, endTime);
+        }
+
+        @Override
+        public void notifyNewLog(String logRootDir, String newLogPath) throws RemoteException {
+            LogWriter.initIfNotInited(getApplicationContext(), logRootDir, false);
+
+            int count = mNewLogListeners.beginBroadcast();
+            for (int i = 0; i < count; i++) {
+                INewLogListener listener = mNewLogListeners.getBroadcastItem(i);
+                listener.onNewLog(newLogPath);
+            }
+            mNewLogListeners.finishBroadcast();
+        }
+
+        @Override
+        public void registerNewLogListener(INewLogListener newLogListener) throws RemoteException {
+            mNewLogListeners.register(newLogListener);
+        }
+
+        @Override
+        public void unregisterNewLogListener(INewLogListener newLogListener) throws RemoteException {
+            mNewLogListeners.unregister(newLogListener);
         }
     };
 

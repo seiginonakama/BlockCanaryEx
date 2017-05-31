@@ -16,9 +16,13 @@
 package com.letv.sarrsdesktop.blockcanaryex.jrt.internal;
 import com.letv.sarrsdesktop.blockcanaryex.jrt.internal.CpuInfo;
 import com.letv.sarrsdesktop.blockcanaryex.jrt.internal.GcInfo;
+import com.letv.sarrsdesktop.blockcanaryex.jrt.internal.INewLogListener;
 
 interface ISamplerService {
     void resetSampler(int pid, long startTimeMs);
     CpuInfo getCurrentCpuInfo(long startTimeMs, long endTimeMs);
     List<GcInfo> popGcInfoBetween(long startTimeMs, long endTimeMs);
+    void notifyNewLog(String logRootDir, String newLogPath);
+    void registerNewLogListener(INewLogListener newLogListener);
+    void unregisterNewLogListener(INewLogListener newLogListener);
 }

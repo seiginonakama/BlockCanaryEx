@@ -29,6 +29,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.Log;
 
+import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -115,6 +116,20 @@ public class BlockMonitor {
         }
     };
 
+    private static final LogWriter.LogListener LOG_LISTENER = new LogWriter.LogListener() {
+        @Override
+        public void onNewLog(File log) {
+            ISamplerService samplerService = getServiceSyncMayNull();
+            if(samplerService != null) {
+                try {
+                    samplerService.notifyNewLog(BlockCanaryEx.getConfig().provideLogPath(), log.getAbsolutePath());
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    };
+
     private static final LooperMonitor LOOPER_MONITOR = new LooperMonitor(BLOCK_LISTENER);
     private static final List<WeakReference<BlockObserver>> sBlockObservers = new ArrayList<>();
 
@@ -172,6 +187,7 @@ public class BlockMonitor {
         MethodInfoPool.setMaxBuffer(context.getResources().getInteger(R.integer.block_canary_ex_max_method_info_buffer));
         ensureMonitorInstalled();
         connectServiceIfNot();
+        LogWriter.registerLogListener(LOG_LISTENER);
     }
 
     //only running on main thread
