@@ -21,8 +21,8 @@ sourceCompatibility = JavaVersion.VERSION_1_7
 version = "0.9.9.2"
 group = "com.letv.sarrsdesktop"
 
-def siteUrl = 'https://github.com/lqcandqq13/BlockCanaryEx'    // project homepage
-def gitUrl = 'https://github.com/lqcandqq13/BlockCanaryEx.git' // project git
+def siteUrl = 'https://github.com/seiginonakama/BlockCanaryEx'    // project homepage
+def gitUrl = 'https://github.com/seiginonakama/BlockCanaryEx.git' // project git
 
 install {
     repositories.mavenInstaller {
