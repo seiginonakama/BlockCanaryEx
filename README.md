@@ -16,6 +16,11 @@ What's the difference between BlockCanaryEx and BlockCanary
 - BlockCanaryEx add gc sampler，we can know whether and when gc happened during we blocked.
 - add view performance sampler, we can know the detail about view measure, layout, draw during we blocked.
 
+What's we target
+-------------
+
+![blocksource](./block_source.jpeg)
+
 Download
 -------------
 root build.gradle

@@ -16,6 +16,11 @@ BlockCanaryEx和BlockCanary的区别如下
 - 添加了gc采样，当应用卡顿时，我们可以知道卡顿时是否发生了gc，以及gc的时间；
 - 监控view性能，计算卡顿时，view的measure,layout,draw消耗的时间。
 
+卡顿源
+-------------
+
+![blocksource](./block_source.jpeg)
+
 安装
 -------------
 root build.gradle
