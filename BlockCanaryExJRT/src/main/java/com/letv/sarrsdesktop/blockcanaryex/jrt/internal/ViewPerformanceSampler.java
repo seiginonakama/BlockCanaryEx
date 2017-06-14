@@ -29,7 +29,7 @@ import java.util.Stack;
  * <p>
  * author: zhoulei date: 2017/5/3.
  */
-class ViewPerformanceSampler {
+public class ViewPerformanceSampler {
     private static final long TRACE_TAG_VIEW = 1L << 3;
 
     private static boolean installed = false;
@@ -40,7 +40,7 @@ class ViewPerformanceSampler {
     static void install() {
         if (!installed) {
             installed = true;
-            if (Build.VERSION.SDK_INT >= 20) {
+            if (isSupported()) {
                 try {
                     Method traceBegin = Trace.class.getDeclaredMethod("traceBegin", long.class, String.class);
                     Method traceEnd = Trace.class.getDeclaredMethod("traceEnd", long.class);
@@ -52,6 +52,10 @@ class ViewPerformanceSampler {
                 }
             }
         }
+    }
+
+    public static boolean isSupported() {
+        return Build.VERSION.SDK_INT >= 20 && Build.VERSION.SDK_INT < 26;
     }
 
     public static void traceBegin(long traceTag, String methodName) {

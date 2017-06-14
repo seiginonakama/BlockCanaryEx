@@ -17,6 +17,7 @@ package com.letv.sarrsdesktop.blockcanaryex.jrt.ui;
 
 import com.letv.sarrsdesktop.blockcanaryex.jrt.BlockInfo;
 import com.letv.sarrsdesktop.blockcanaryex.jrt.R;
+import com.letv.sarrsdesktop.blockcanaryex.jrt.internal.ViewPerformanceSampler;
 
 import android.content.Context;
 import android.os.Build;
@@ -29,6 +30,7 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import java.util.Arrays;
+import java.util.Locale;
 
 import static com.letv.sarrsdesktop.blockcanaryex.jrt.BlockInfo.SEPARATOR;
 
@@ -185,8 +187,8 @@ final class DetailAdapter extends BaseAdapter {
                 return contentBuilder.append("top-frequent-method :").append(SEPARATOR).append(SEPARATOR).append(mBlockInfo.getTopFrequentMethod()).toString();
             case POSITION_VIEW:
                 if(TextUtils.isEmpty(mBlockInfo.getViewPerformance()))  {
-                    if(Build.VERSION.SDK_INT < 20) {
-                        return "view-perf : (only work on android 20 and later)";
+                    if(!ViewPerformanceSampler.isSupported()) {
+                        return String.format(Locale.getDefault(), "view-perf : don't support current android version %d", Build.VERSION.SDK_INT);
                     }
                     return "view-perf : null";
                 } else {

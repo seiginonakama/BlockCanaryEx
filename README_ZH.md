@@ -41,9 +41,9 @@ apply plugin: 'blockcanaryex'
 ```
 
 ```groovy
-debugCompile 'com.letv.sarrsdesktop:BlockCanaryExJRT:0.9.9.0'
-releaseCompile 'com.letv.sarrsdesktop:BlockCanaryExJRTNoOp:0.9.9.0'
-testCompile 'com.letv.sarrsdesktop:BlockCanaryExJRTNoOp:0.9.9.0'
+debugCompile 'com.letv.sarrsdesktop:BlockCanaryExJRT:0.9.9.1'
+releaseCompile 'com.letv.sarrsdesktop:BlockCanaryExJRTNoOp:0.9.9.1'
+testCompile 'com.letv.sarrsdesktop:BlockCanaryExJRTNoOp:0.9.9.1'
 ```
 
 基础使用
