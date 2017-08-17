@@ -234,7 +234,7 @@ public class BlockCanaryExTransform extends Transform {
     void setFilter(BlockCanaryExExtension block) {
         mExcludePackages.addAll(block.excludePackages)
         mIncludePackages.addAll(block.includePackages)
-        mExcludeClasses.addAll(block.excludePackages)
+        mExcludeClasses.addAll(block.excludeClasses)
     }
 
     static void obtainProjectClassPath(Project project, Set<String> classPath) {

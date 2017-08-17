@@ -97,7 +97,7 @@ class SamplerInjecter {
     }
 
     static void injectConstructorSamplerCode(CtClass clazz, CtConstructor ctConstructor) {
-        if(ctConstructor.isEmpty()) {
+        if (ctConstructor.isEmpty()) {
             return;
         }
         insertSamplerCode(clazz, ctConstructor)
@@ -109,8 +109,8 @@ class SamplerInjecter {
         ctBehavior.addLocalVariable("__bl_icl", CtClass.booleanType);
         boolean isActivityCreating = false;
         String className = generateClassName(clazz)
-        String paramTypes = generateParamTypes(ctBehavior.parameterTypes)
-        if(ctBehavior.name == "onCreate"
+        String paramTypes = generateParamTypes(getParameterTypes(ctBehavior))
+        if (ctBehavior.name == "onCreate"
                 && paramTypes == 'android.os.Bundle'
                 && isChildOf(clazz, "android.app.Activity")) {
             isActivityCreating = true;
@@ -128,20 +128,32 @@ class SamplerInjecter {
         ctBehavior.insertAfter(
                 """
                    if(__bl_icl) {
-                       ${isActivityCreating ? "com.letv.sarrsdesktop.blockcanaryex.jrt.internal.MethodSampler.reportActivityCreated(\"${className}\");" : ""}
-                       com.letv.sarrsdesktop.blockcanaryex.jrt.internal.MethodSampler.onMethodExit(__bl_stn, __bl_stt, "${className}", "${ctBehavior.name}", "${paramTypes}");
+                       ${
+                    isActivityCreating ? "com.letv.sarrsdesktop.blockcanaryex.jrt.internal.MethodSampler.reportActivityCreated(\"${className}\");" : ""
+                }
+                       com.letv.sarrsdesktop.blockcanaryex.jrt.internal.MethodSampler.onMethodExit(__bl_stn, __bl_stt, "${
+                    className
+                }", "${ctBehavior.name}", "${paramTypes}");
                    }
                 """)
     }
 
     static boolean isChildOf(CtClass ctClass, String className) {
-        if(ctClass.name == className) {
+        if (ctClass.name == className) {
             return true
         } else {
-            CtClass superCls = ctClass.getSuperclass()
-            if(superCls != null) {
-                return isChildOf(superCls, className)
-            } else {
+            try {
+                CtClass superCls = ctClass.getSuperclass()
+                if (superCls != null) {
+                    return isChildOf(superCls, className)
+                } else {
+                    return false;
+                }
+            } catch (NotFoundException e) {
+                println("warning: can't find super class in classPool! " + e.toString())
+                if (ctClass.getClassFile2().getSuperclass() == className) {
+                    return true;
+                }
                 return false;
             }
         }
@@ -150,16 +162,17 @@ class SamplerInjecter {
     static String generateClassName(CtClass clazz) {
         String clazzName = clazz.getName()
         int index$ = clazzName.lastIndexOf("\$")
-        if(index$ < 0) {
+        if (index$ < 0) {
             return clazzName
         } else {
             String suffix = clazzName.subSequence(index$ + 1, clazzName.length())
-            if(Character.isDigit(suffix.charAt(0))) {
+            if (Character.isDigit(suffix.charAt(0))) {
+                //anonymous class
                 String parentSimpleName;
                 ClassFile classFile = clazz.getClassFile2()
-                if(classFile.getSuperclass() == "java.lang.Object") {
+                if (classFile.getSuperclass() == "java.lang.Object") {
                     String[] interfaces = classFile.getInterfaces();
-                    if(interfaces != null && interfaces.length > 0) {
+                    if (interfaces != null && interfaces.length > 0) {
                         parentSimpleName = interfaces[0];
                     } else {
                         parentSimpleName = Object.class.simpleName;
@@ -174,11 +187,13 @@ class SamplerInjecter {
         }
     }
 
-    static String generateParamTypes(CtClass[] paramTypes) {
+    static String generateParamTypes(String[] paramTypes) {
+        if(paramTypes == null) {
+            return "";
+        }
         StringBuilder argTypesBuilder = new StringBuilder();
         for (int i = 0; i < paramTypes.length; i++) {
-            CtClass paramCls = paramTypes[i]
-            argTypesBuilder.append(paramCls.name)
+            argTypesBuilder.append(paramTypes[i])
             if (i != paramTypes.length - 1) {
                 argTypesBuilder.append(",")
             }
@@ -229,6 +244,126 @@ class SamplerInjecter {
                 }
             }
         }
+    }
+
+    /**
+     * modified from javassist.bytecode.Descriptor.getParameterTypes()
+     */
+    public static String[] getParameterTypes(CtBehavior ctBehavior)
+            throws NotFoundException {
+        String desc = ctBehavior.getMethodInfo2().getDescriptor();
+        if (desc.charAt(0) != '(')
+            return null;
+        else {
+            int num = numOfParameters(desc);
+            String[] args = new CtClass[num];
+            int n = 0;
+            int i = 1;
+            while (i > 0) {
+                i = toClassName(desc, i, args, n++);
+            }
+            return args;
+        }
+    }
+
+    private static int numOfParameters(String desc) {
+        int n = 0;
+        int i = 1;
+        for (; ;) {
+            char c = desc.charAt(i);
+            if (c == ')'.charAt(0))
+                break;
+
+            while (c == '['.charAt(0))
+                c = desc.charAt(++i);
+
+            if (c == 'L'.charAt(0)) {
+                i = desc.indexOf(';', i) + 1;
+                if (i <= 0)
+                    throw new IndexOutOfBoundsException("bad descriptor");
+            } else
+                ++i;
+
+            ++n;
+        }
+
+        return n;
+    }
+
+    private static int toClassName(String desc, int i,
+                                   String[] args, int n)
+            throws NotFoundException {
+        int i2;
+        String name;
+
+        int arrayDim = 0;
+        char c = desc.charAt(i);
+        while (c == '['.charAt(0)) {
+            ++arrayDim;
+            c = desc.charAt(++i);
+        }
+
+        if (c == 'L'.charAt(0)) {
+            i2 = desc.indexOf(';', ++i);
+            name = desc.substring(i, i2++).replace('/', '.');
+        } else {
+            String type = toPrimitiveClass(c);
+            if (type == null)
+                return -1; // error
+
+            i2 = i + 1;
+            if (arrayDim == 0) {
+                args[n] = type;
+                return i2; // neither an array type or a class type
+            } else
+                name = type.getName();
+        }
+
+        if (arrayDim > 0) {
+            StringBuffer sbuf = new StringBuffer(name);
+            while (arrayDim-- > 0)
+                sbuf.append("[]");
+
+            name = sbuf.toString();
+        }
+
+        args[n] = name;
+        return i2;
+    }
+
+    static String toPrimitiveClass(char c) {
+        String type = null;
+        switch (c) {
+            case 'Z':
+                type = 'boolean';
+                break;
+            case 'C':
+                type = 'char';
+                break;
+            case 'B':
+                type = 'byte';
+                break;
+            case 'S':
+                type = 'short';
+                break;
+            case 'I':
+                type = 'int';
+                break;
+            case 'J':
+                type = 'long';
+                break;
+            case 'F':
+                type = 'float';
+                break;
+            case 'D':
+                type = 'double';
+                break;
+            case 'V':
+                type = 'void';
+                break;
+        }
+
+        return type;
     }
 }
 

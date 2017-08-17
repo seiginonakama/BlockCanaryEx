@@ -22,7 +22,6 @@ import com.android.builder.Version
 import org.apache.commons.io.FileUtils
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.internal.artifacts.ivyservice.ivyresolve.strategy.DefaultVersionComparator
 
 /**
  * author: zhoulei date: 2017/2/28.
@@ -39,8 +38,18 @@ public class BlockCanaryExPlugin implements Plugin<Project> {
 
     static final boolean ABOVE_ANDROID_GRADLE_PLUGIN_3;
     static {
-        Comparator<String> versionComparator = new DefaultVersionComparator().asStringComparator();
-        ABOVE_ANDROID_GRADLE_PLUGIN_3 = versionComparator.compare(Version.ANDROID_GRADLE_PLUGIN_VERSION, "3.0.0-alpha1") >= 0
+        String aVersion = Version.ANDROID_GRADLE_PLUGIN_VERSION.trim();
+        char[] aVersionChars = aVersion.chars
+        if (aVersionChars.length == 0) {
+            ABOVE_ANDROID_GRADLE_PLUGIN_3 = false;
+        } else {
+            char firstChar = aVersion.charAt(0)
+            if (aVersionChars.length == 1) {
+                ABOVE_ANDROID_GRADLE_PLUGIN_3 = firstChar >= '3';
+            } else {
+                ABOVE_ANDROID_GRADLE_PLUGIN_3 = aVersion.charAt(1) != '.' || firstChar >= '3';
+            }
+        }
     }
 
     private File mBuildDir;

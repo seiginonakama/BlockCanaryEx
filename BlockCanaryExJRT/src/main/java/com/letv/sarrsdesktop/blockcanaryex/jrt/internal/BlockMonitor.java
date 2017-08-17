@@ -15,12 +15,6 @@
  */
 package com.letv.sarrsdesktop.blockcanaryex.jrt.internal;
 
-import com.letv.sarrsdesktop.blockcanaryex.jrt.BlockCanaryEx;
-import com.letv.sarrsdesktop.blockcanaryex.jrt.BlockInfo;
-import com.letv.sarrsdesktop.blockcanaryex.jrt.Config;
-import com.letv.sarrsdesktop.blockcanaryex.jrt.MethodInfo;
-import com.letv.sarrsdesktop.blockcanaryex.jrt.R;
-
 import android.content.Context;
 import android.content.Intent;
 import android.os.Looper;
@@ -28,6 +22,12 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.Log;
+
+import com.letv.sarrsdesktop.blockcanaryex.jrt.BlockCanaryEx;
+import com.letv.sarrsdesktop.blockcanaryex.jrt.BlockInfo;
+import com.letv.sarrsdesktop.blockcanaryex.jrt.Config;
+import com.letv.sarrsdesktop.blockcanaryex.jrt.MethodInfo;
+import com.letv.sarrsdesktop.blockcanaryex.jrt.R;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
@@ -166,6 +166,10 @@ public class BlockMonitor {
         SamplerReportHandler.getInstance().post(new Runnable() {
             @Override
             public void run() {
+                if(sMethodInfoPool == null) {
+                    //if somebody has not call install(), the sMethodInfoPool is null
+                    sMethodInfoPool = new ArrayPool<>(1024, MethodInfo.class);
+                }
                 MethodInfo methodInfo = sMethodInfoPool.obtain();
                 methodInfo.setCls(cls);
                 methodInfo.setMethod(method);
