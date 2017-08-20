@@ -39,10 +39,10 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile project(':BlockCanaryExJRT')
+//    compile project(':BlockCanaryExJRT')
     compile project(':library')
-//    debugCompile 'com.letv.sarrsdesktop:BlockCanaryExJRT:0.9.9.3'
-//    releaseCompile 'com.letv.sarrsdesktop:BlockCanaryExJRTNoOp:0.9.9.3'
-//    testCompile 'com.letv.sarrsdesktop:BlockCanaryExJRTNoOp:0.9.9.3'
+    debugCompile 'com.letv.sarrsdesktop:BlockCanaryExJRT:0.9.9.4'
+    releaseCompile 'com.letv.sarrsdesktop:BlockCanaryExJRTNoOp:0.9.9.4'
+    testCompile 'com.letv.sarrsdesktop:BlockCanaryExJRTNoOp:0.9.9.4'
     compile 'com.android.support:appcompat-v7:25.1.0'
 }
