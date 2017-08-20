@@ -19,6 +19,7 @@ import com.letv.sarrsdesktop.blockcanaryex.jrt.internal.BlockMonitor;
 import com.letv.sarrsdesktop.blockcanaryex.jrt.internal.ProcessUtils;
 
 import android.annotation.TargetApi;
+import android.app.Application;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -36,7 +37,7 @@ public class Config implements BlockMonitor.BlockObserver {
         if(context == null) {
             throw new IllegalArgumentException("context must not be null!");
         }
-        mContext = context.getApplicationContext();
+        mContext = context instanceof Application ? context : context.getApplicationContext();
     }
 
     /**

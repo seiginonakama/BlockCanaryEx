@@ -4,6 +4,7 @@ import com.letv.sarrsdesktop.blockcanaryex.jrt.BlockCanaryEx;
 import com.letv.sarrsdesktop.blockcanaryex.jrt.Config;
 
 import android.app.Application;
+import android.content.Context;
 
 import java.util.Random;
 
@@ -12,13 +13,12 @@ import java.util.Random;
  */
 public class TestApplication extends Application {
     @Override
-    public void onCreate() {
+    public void attachBaseContext(Context context) {
+        super.attachBaseContext(context);
         boolean isInSamplerProcess = BlockCanaryEx.isInSamplerProcess(this);
         if(!isInSamplerProcess) {
             BlockCanaryEx.install(new Config(this));
         }
-        super.onCreate();
-
         if(!isInSamplerProcess) {
             doHeavyWork();
         }
