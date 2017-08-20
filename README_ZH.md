@@ -49,18 +49,17 @@ testCompile 'com.letv.sarrsdesktop:BlockCanaryExJRTNoOp:0.9.9.4'
 基础使用
 -------------
 
-在应用application onCreate()时，第一时间初始化BlockCanaryEx
+在应用application attachBaseContext()时，第一时间初始化BlockCanaryEx
 
 ```java
 public class TestApplication extends Application {
     @Override
-    public void onCreate() {
+    public void attachBaseContext(Context context) {
+        super.attachBaseContext(context);
         boolean isInSamplerProcess = BlockCanaryEx.isInSamplerProcess(this);
         if(!isInSamplerProcess) {
             BlockCanaryEx.install(new Config(this));
         }
-        super.onCreate();
-
         if(!isInSamplerProcess) {
             //your code start here
         }

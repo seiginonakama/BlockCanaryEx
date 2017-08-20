@@ -49,18 +49,17 @@ testCompile 'com.letv.sarrsdesktop:BlockCanaryExJRTNoOp:0.9.9.4'
 Basic Usage
 -------------
 
-init BlockCanaryEx before other method when your application created
+init BlockCanaryEx before other method when your application attachBaseContext
 
 ```java
 public class TestApplication extends Application {
     @Override
-    public void onCreate() {
+    public void attachBaseContext(Context context) {
+        super.attachBaseContext(context);
         boolean isInSamplerProcess = BlockCanaryEx.isInSamplerProcess(this);
         if(!isInSamplerProcess) {
             BlockCanaryEx.install(new Config(this));
         }
-        super.onCreate();
-
         if(!isInSamplerProcess) {
             //your code start here
         }
