@@ -316,7 +316,7 @@ class SamplerInjecter {
                 args[n] = type;
                 return i2; // neither an array type or a class type
             } else
-                name = type.getName();
+                name = type;
         }
 
         if (arrayDim > 0) {
